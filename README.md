@@ -9,6 +9,17 @@
 
 Aurevia Care pairs a premium pharmacy storefront with prescription-aware fulfilment and a source-attributed Rajshahi care navigator. It is built for a pharmacist-led operating model: the application can help people discover products and care services, but it never diagnoses, prescribes, or substitutes professional medical judgement.
 
+## Project links
+
+| Resource | Availability |
+| --- | --- |
+| Source repository | [github.com/shadianoormou/aurevia-care](https://github.com/shadianoormou/aurevia-care) |
+| Local preview | [http://127.0.0.1:5173](http://127.0.0.1:5173) — available on the development machine |
+| Continuous delivery | [GitHub Actions](https://github.com/shadianoormou/aurevia-care/actions) — validates every push to `main` |
+| Public production site | **Pending Azure App Service and Azure SQL provisioning** — a public URL is intentionally not claimed before the full secure service is deployed |
+
+> The local preview is not an internet-facing public website. The production deployment pipeline is already in the repository and will publish the same application once the Azure production environment is connected.
+
 ## Why it exists
 
 Healthcare shopping needs more than a pretty catalogue. Aurevia Care gives customers a refined way to browse care essentials, securely submit prescriptions, and find appropriate local services; it gives pharmacy teams the operational controls needed to review prescriptions, manage inventory, publish trusted directory entries, and protect fulfilment history.
@@ -46,19 +57,64 @@ This repository intentionally keeps health and pharmacy operations within safe b
 
 ## Architecture
 
-```text
-React customer & staff portals
-            |
-            v
-Express API ── authentication, validation, rate limits, role checks
-            |
-            +── product catalogue / orders / inventory
-            +── prescription review / protected uploads
-            +── Care Concierge / verified provider directory
-            |
-            v
-Microsoft SQL Server or Azure SQL
+```mermaid
+flowchart TB
+    Browser[Customer and staff browser]
+
+    subgraph Experience[React + Vite experience layer]
+        Storefront[Premium storefront / Catalogue / Cart / Checkout]
+        Care[Care Concierge / Bangla-English / Voice input]
+        Prescription[Prescription Centre / Upload / Manual entry / Status]
+        Backoffice[Protected staff portal / Orders / Inventory / Directory]
+    end
+
+    subgraph Service[Express application service]
+        Security[HTTP-only sessions / Role checks / Rate limits / Validation]
+        Commerce[Catalogue / Reviews / Orders / Stock reservation]
+        Clinical[Prescription workflow / Human pharmacist approval]
+        Navigator[Care navigator / Source-attributed routing]
+    end
+
+    subgraph Data[Microsoft SQL Server / Azure SQL]
+        Core[(Users / Products / Categories / Orders / Reviews)]
+        Protected[(Prescriptions · Audit history)]
+        Directory[(Rajshahi care directory / Sources / Verification dates)]
+    end
+
+    subgraph Optional[Optional managed services]
+        OCR[Azure AI Document Intelligence]
+        Images[Cloudinary product images]
+    end
+
+    Browser --> Storefront
+    Browser --> Care
+    Browser --> Prescription
+    Browser --> Backoffice
+    Storefront --> Security
+    Care --> Security
+    Prescription --> Security
+    Backoffice --> Security
+    Security --> Commerce
+    Security --> Clinical
+    Security --> Navigator
+    Commerce --> Core
+    Clinical --> Protected
+    Navigator --> Directory
+    Clinical -. assistive text extraction .-> OCR
+    Commerce -. product media .-> Images
 ```
+
+| Layer | Responsibility | Safety control |
+| --- | --- | --- |
+| React experience | Customer journey and protected staff workspaces | No clinical decision is made in the browser |
+| Express service | API contracts, authentication, workflow enforcement, and business rules | HTTP-only cookies, role checks, allowlisted filters, rate limits |
+| SQL data layer | Transactional catalogue, fulfilment, prescription, and directory records | GUIDs, foreign keys, constraints, indexes, and audit timestamps |
+| Pharmacist review | Prescription approval and prescription-only ordering | OCR is assistive only; human approval is mandatory |
+| Provider verification | Local care and blood-support directory publishing | Source URL, verification date, and publish/archive workflow |
+
+### Production request path
+
+GitHub Actions builds the React client and places it beside the Express application for a single-origin Azure App Service release. In production, the browser receives the application and calls `/api` from the same HTTPS domain; Express applies security controls and uses Azure SQL for persistent data. This avoids exposing an API key or a database connection to the browser and keeps the authenticated session cookie first-party.
 
 ## Repository layout
 

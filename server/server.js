@@ -5,6 +5,9 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { connectDB } from "./config/db.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
@@ -20,7 +23,12 @@ import careNavigatorRoutes from "./routes/careNavigatorRoutes.js";
 dotenv.config();
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+const productionClientPath = path.join(__dirname, "public");
+const hasProductionClient = process.env.NODE_ENV === "production"
+  && existsSync(path.join(productionClientPath, "index.html"));
 
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
@@ -56,6 +64,16 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/prescriptions", prescriptionRoutes);
 app.use("/api/care-navigator", careNavigatorRoutes);
+
+// GitHub Actions bundles the Vite application into server/public for the
+// single-origin Azure App Service release. API routes remain above this block.
+if (hasProductionClient) {
+  app.use(express.static(productionClientPath, { index: false, maxAge: "1h" }));
+  app.get("/{*splat}", (req, res, next) => {
+    if (req.path === "/api" || req.path.startsWith("/api/")) return next();
+    return res.sendFile(path.join(productionClientPath, "index.html"));
+  });
+}
 
 app.use(notFound);
 app.use(errorHandler);

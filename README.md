@@ -133,7 +133,7 @@ npm audit --omit=dev
 
 ## Production deployment
 
-Deploy the React client to an HTTPS-capable static host (for example Azure Static Web Apps) and the Express API to Azure App Service, Azure Container Apps, or another managed Node runtime. Use Azure SQL or a managed SQL Server instance for data.
+The included GitHub Actions pipeline packages the React client with the Express API and deploys both to one Azure App Service. This same-origin setup keeps `/api` calls and HTTP-only login cookies on one HTTPS domain. Use Azure SQL or a managed SQL Server instance for data.
 
 Configure production secrets with the host’s secret manager—never commit them. At a minimum, configure:
 
@@ -147,11 +147,24 @@ DB_PASSWORD=your_strong_password
 DB_ENCRYPT=true
 DB_TRUST_SERVER_CERTIFICATE=false
 JWT_SECRET=a_unique_secret_with_at_least_32_characters
-CLIENT_URL=https://your-web-domain.example
-COOKIE_SAME_SITE=none
+CLIENT_URL=https://your-app.azurewebsites.net
+COOKIE_SAME_SITE=lax
 ```
 
-Run `npm run db:migrate` against the target database before the API starts. If the web and API apps use different HTTPS domains, keep `COOKIE_SAME_SITE=none`; if they share a domain through a reverse proxy, use `lax` instead. A PCI-compliant payment provider must be integrated server-side before collecting card details.
+Run `npm run db:migrate` against the target database before the API starts. The Azure App Service must run Node.js 20+ and have `SCM_DO_BUILD_DURING_DEPLOYMENT=true` configured so it restores the API runtime dependencies. A PCI-compliant payment provider must be integrated server-side before collecting card details.
+
+### GitHub automatic deployment
+
+Every push to `main` runs [`.github/workflows/azure-production.yml`](.github/workflows/azure-production.yml). It validates the API, builds the React application with the same-origin `/api` base URL, bundles it into `server/public`, and deploys the release to Azure App Service when the following GitHub **production environment** secrets and variable are present:
+
+| GitHub configuration | Purpose |
+| --- | --- |
+| `AZURE_CLIENT_ID` secret | Azure workload-identity application ID |
+| `AZURE_TENANT_ID` secret | Microsoft Entra tenant ID |
+| `AZURE_SUBSCRIPTION_ID` secret | Azure subscription ID |
+| `AZURE_WEBAPP_NAME` variable | Name of the pre-created Azure App Service app |
+
+The workflow uses GitHub-to-Azure OpenID Connect, so no long-lived publish-profile or Azure password is stored in the repository. Create a federated credential in Azure that trusts this repository’s `main` branch and grants that identity access to the App Service. Until these values are configured, the build remains green and deployment is intentionally skipped rather than pretending a release succeeded.
 
 ## Care-directory operations
 

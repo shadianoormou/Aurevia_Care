@@ -1,0 +1,93 @@
+name: Build and deploy Aurevia Care
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aurevia-care-production
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      NODE_VERSION: "20.x"
+      AZURE_WEBAPP_NAME: ${{ vars.AZURE_WEBAPP_NAME }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+
+      - name: Validate API source
+        working-directory: server
+        run: |
+          node --check server.js
+          node --check controllers/productController.js
+          node --check controllers/careNavigatorController.js
+          node --check controllers/prescriptionController.js
+
+      - name: Build customer application
+        working-directory: client
+        env:
+          VITE_API_URL: /api
+        run: |
+          npm ci
+          npm run build
+
+      - name: Assemble same-origin release
+        shell: bash
+        run: |
+          mkdir -p release/server/public
+          cp -R server/. release/server/
+          rm -rf release/server/node_modules release/server/.env release/server/public
+          cp -R client/dist/. release/server/public/
+
+      - name: Detect Azure production configuration
+        id: azure
+        shell: bash
+        run: |
+          if [ -n "$AZURE_WEBAPP_NAME" ] && [ -n "$AZURE_CLIENT_ID" ] && [ -n "$AZURE_TENANT_ID" ] && [ -n "$AZURE_SUBSCRIPTION_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Azure deployment is waiting for the production GitHub environment configuration."
+          fi
+
+      - name: Sign in to Azure with OpenID Connect
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.azure.outputs.ready == 'true'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy release to Azure App Service
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.azure.outputs.ready == 'true'
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          package: release/server
+
+      - name: Sign out of Azure
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.azure.outputs.ready == 'true'
+        run: az logout

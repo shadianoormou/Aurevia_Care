@@ -9,6 +9,7 @@ server/.env
 
 dist/
 client/dist/
+server/public/
 build/
 
 npm-debug.log*

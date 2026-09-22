@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -14,8 +14,17 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [placing, setPlacing] = useState(false);
   const [prescriptionAcknowledged, setPrescriptionAcknowledged] = useState(false);
+  const [approvedPrescriptions, setApprovedPrescriptions] = useState([]);
+  const [prescriptionId, setPrescriptionId] = useState("");
 
   const hasPrescriptionItems = cartItems.some((item) => item.requiresPrescription);
+
+  useEffect(() => {
+    if (!hasPrescriptionItems) return;
+    api.get("/prescriptions/my")
+      .then(({ data }) => setApprovedPrescriptions(data.prescriptions.filter((prescription) => prescription.status === "Approved" && (!prescription.expiresAt || new Date(prescription.expiresAt) > new Date()))))
+      .catch(() => setApprovedPrescriptions([]));
+  }, [hasPrescriptionItems]);
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -48,6 +57,10 @@ const Checkout = () => {
       toast.error("Please acknowledge the prescription notice before placing your order");
       return;
     }
+    if (hasPrescriptionItems && !prescriptionId) {
+      toast.error("Choose an approved prescription before placing this order");
+      return;
+    }
 
     setPlacing(true);
     try {
@@ -58,6 +71,7 @@ const Checkout = () => {
         shippingAddress,
         paymentMethod,
         prescriptionAcknowledged,
+        prescriptionId: hasPrescriptionItems ? prescriptionId : undefined,
       });
 
       clearCart();
@@ -149,6 +163,19 @@ const Checkout = () => {
                 />
                 I confirm I have a valid prescription for the medicine in this order.
               </label>
+              <div className="mt-4">
+                <label className="text-sm font-semibold text-gray-700">Approved prescription</label>
+                {approvedPrescriptions.length === 0 ? (
+                  <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    You need an approved prescription before checkout. <Link to="/prescriptions" className="font-bold underline">Upload a scan or enter it manually</Link>.
+                  </div>
+                ) : (
+                  <select value={prescriptionId} onChange={(event) => setPrescriptionId(event.target.value)} className="input-field mt-1">
+                    <option value="">Select an approved prescription</option>
+                    {approvedPrescriptions.map((prescription) => <option key={prescription._id} value={prescription._id}>{prescription.doctorName || "Verified prescription"} · submitted {new Date(prescription.createdAt).toLocaleDateString()}</option>)}
+                  </select>
+                )}
+              </div>
             </div>
           )}
 
@@ -179,7 +206,7 @@ const Checkout = () => {
           </div>
           <button
             type="submit"
-            disabled={placing || (hasPrescriptionItems && !prescriptionAcknowledged)}
+            disabled={placing || (hasPrescriptionItems && (!prescriptionAcknowledged || !prescriptionId))}
             className="btn-primary w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {placing ? "Placing Order..." : "Place Order"}

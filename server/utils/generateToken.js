@@ -7,16 +7,14 @@ const generateToken = (id, role) => {
   });
 };
 
-// Sends the token as an httpOnly cookie AND returns it in JSON
-// (httpOnly cookie is safer, but we also return it so the frontend
-// can store role/user info in Context easily)
+// Sends the token only as an httpOnly cookie so it cannot be read by JavaScript.
 export const sendTokenResponse = (user, statusCode, res) => {
   const token = generateToken(user._id, user.role);
 
   const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production" || process.env.COOKIE_SAME_SITE === "none",
+    sameSite: process.env.COOKIE_SAME_SITE || "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
 
@@ -24,7 +22,6 @@ export const sendTokenResponse = (user, statusCode, res) => {
 
   res.status(statusCode).json({
     success: true,
-    token,
     user: {
       _id: user._id,
       name: user.name,

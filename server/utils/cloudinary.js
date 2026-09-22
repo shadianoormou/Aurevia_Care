@@ -31,9 +31,23 @@ export const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
+// Prescription files never go to the public product-media bucket. They are
+// persisted in SQL Server and exposed only through an authorized API route.
+const prescriptionFileFilter = (req, file, cb) => {
+  const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+  if (allowed.includes(file.mimetype)) cb(null, true);
+  else cb(new Error("Upload a JPG, PNG, WEBP, or PDF prescription"), false);
+};
+
+export const prescriptionUpload = multer({
+  storage,
+  fileFilter: prescriptionFileFilter,
+  limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+});
+
 // Streams a file buffer (from multer memory storage) up to Cloudinary.
 // Returns the Cloudinary result, which contains `secure_url` and `public_id`.
-export const uploadBufferToCloudinary = (buffer, folder = "medimart-ai/products") => {
+export const uploadBufferToCloudinary = (buffer, folder = "aurevia-care/products") => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {

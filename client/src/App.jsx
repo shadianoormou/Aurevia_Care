@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
@@ -13,20 +14,25 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Profile from "./pages/Profile.jsx";
 import MyOrders from "./pages/MyOrders.jsx";
+import PrescriptionCenter from "./pages/PrescriptionCenter.jsx";
+import CareGuide from "./pages/CareGuide.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
-import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
-import AdminProducts from "./pages/admin/AdminProducts.jsx";
-import AdminCategories from "./pages/admin/AdminCategories.jsx";
-import AdminOrders from "./pages/admin/AdminOrders.jsx";
-import AdminUsers from "./pages/admin/AdminUsers.jsx";
-import AdminInventory from "./pages/admin/AdminInventory.jsx";
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard.jsx"));
+const AdminProducts = lazy(() => import("./pages/admin/AdminProducts.jsx"));
+const AdminCategories = lazy(() => import("./pages/admin/AdminCategories.jsx"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders.jsx"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers.jsx"));
+const AdminInventory = lazy(() => import("./pages/admin/AdminInventory.jsx"));
+const AdminPrescriptions = lazy(() => import("./pages/admin/AdminPrescriptions.jsx"));
+const AdminCareDirectory = lazy(() => import("./pages/admin/AdminCareDirectory.jsx"));
 
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
+        <Suspense fallback={<div className="py-20 text-center text-sm text-primary-700">Loading your workspace…</div>}>
         <Routes>
           {/* Public */}
           <Route path="/" element={<Home />} />
@@ -40,6 +46,8 @@ function App() {
           <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+          <Route path="/prescriptions" element={<ProtectedRoute><PrescriptionCenter /></ProtectedRoute>} />
+          <Route path="/care" element={<CareGuide />} />
 
           {/* Admin / Pharmacist protected */}
           <Route
@@ -66,10 +74,19 @@ function App() {
             path="/admin/inventory"
             element={<AdminRoute roles={["admin", "pharmacist"]}><AdminInventory /></AdminRoute>}
           />
+          <Route
+            path="/admin/prescriptions"
+            element={<AdminRoute roles={["admin", "pharmacist"]}><AdminPrescriptions /></AdminRoute>}
+          />
+          <Route
+            path="/admin/care-directory"
+            element={<AdminRoute roles={["admin"]}><AdminCareDirectory /></AdminRoute>}
+          />
 
           {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </main>
       <Footer />
     </div>

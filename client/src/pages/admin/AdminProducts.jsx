@@ -8,7 +8,7 @@ import ConfirmModal from "../../components/ConfirmModal.jsx";
 import { formatPrice } from "../../utils/currency.js";
 
 const emptyForm = {
-  name: "", brand: "", description: "", category: "", symptoms: "",
+  name: "", brand: "", description: "", category: "", subcategory: "", symptoms: "",
   price: "", stock: "", lowStockThreshold: 10, image: "", requiresPrescription: false,
 };
 
@@ -26,6 +26,8 @@ const AdminProducts = () => {
 
   const { register, handleSubmit, reset, watch, formState: { isSubmitting } } = useForm({ defaultValues: emptyForm });
   const imageUrlValue = watch("image");
+  const selectedCategoryId = watch("category");
+  const selectedCategory = categories.find((category) => category._id === selectedCategoryId);
 
   const loadData = async () => {
     setLoading(true);
@@ -64,6 +66,7 @@ const AdminProducts = () => {
       brand: product.brand,
       description: product.description,
       category: product.category?._id,
+      subcategory: product.subcategory?._id || "",
       symptoms: product.symptoms?.join(", "),
       price: product.price,
       stock: product.stock,
@@ -93,6 +96,7 @@ const AdminProducts = () => {
       body.append("brand", formData.brand || "");
       body.append("description", formData.description);
       body.append("category", formData.category);
+      if (formData.subcategory) body.append("subcategory", formData.subcategory);
       body.append("price", Number(formData.price));
       body.append("stock", Number(formData.stock));
       body.append("lowStockThreshold", Number(formData.lowStockThreshold || 10));
@@ -230,6 +234,16 @@ const AdminProducts = () => {
                   <label className="text-sm text-gray-600">Symptoms (comma-separated)</label>
                   <input {...register("symptoms")} className="input-field mt-1" placeholder="fever, headache" />
                 </div>
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Subcategory</label>
+                <select {...register("subcategory")} className="input-field mt-1" disabled={!selectedCategory}>
+                  <option value="">Select subcategory (optional)</option>
+                  {selectedCategory?.subcategories?.map((subcategory) => (
+                    <option key={subcategory._id} value={subcategory._id}>{subcategory.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid sm:grid-cols-3 gap-4">

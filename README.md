@@ -1,589 +1,182 @@
+# Aurevia Care
 
-# MediMart AI — Smart E-Pharmacy Platform 💊
+> A safety-first digital pharmacy and local-care discovery platform for Bangladesh.
 
-MediMart AI is a full-stack MERN e-pharmacy platform designed for browsing, ordering, and managing medicines and healthcare products online. The platform includes customer shopping features, role-based dashboards for admins and pharmacists, inventory management, order tracking, product verification, prescription safety checks, and smart symptom-based product search.
+[![React](https://img.shields.io/badge/Web-React%2018-61DAFB?logo=react&logoColor=white)](client)
+[![Express](https://img.shields.io/badge/API-Express%205-000000?logo=express&logoColor=white)](server)
+[![SQL Server](https://img.shields.io/badge/Data-Microsoft%20SQL%20Server-CC2927?logo=microsoftsqlserver&logoColor=white)](server/migrations)
+[![License](https://img.shields.io/badge/license-Private%20client%20project-5B2C6F)](#licensing)
 
-> ⚠️ **Medical Disclaimer:** MediMart AI does not provide medical advice. Users should consult a doctor or pharmacist before taking any medicine.
+Aurevia Care pairs a premium pharmacy storefront with prescription-aware fulfilment and a source-attributed Rajshahi care navigator. It is built for a pharmacist-led operating model: the application can help people discover products and care services, but it never diagnoses, prescribes, or substitutes professional medical judgement.
 
----
+## Why it exists
 
-## 🚀 Project Overview
+Healthcare shopping needs more than a pretty catalogue. Aurevia Care gives customers a refined way to browse care essentials, securely submit prescriptions, and find appropriate local services; it gives pharmacy teams the operational controls needed to review prescriptions, manage inventory, publish trusted directory entries, and protect fulfilment history.
 
-This project was built as a complete full-stack web application using the MERN stack. The main goal of MediMart AI is to demonstrate how an online pharmacy system can manage customers, medicines, categories, orders, stock, reviews, and role-based administration from one platform.
+## Highlights
 
-The application supports three user roles:
+- **Luxury, responsive storefront** — editorial hero layouts, animated category browsing, product imagery, shareable filters, and polished mobile-first interactions.
+- **Five care collections** — Medicines & Wellness, Skin Care, Hair & Scalp, Oral & Dental, and Creams & First Aid, with 21 SQL-backed subcategories.
+- **Prescription centre** — authenticated image/PDF upload or manual entry, protected file access, pharmacist review states, approval expiry, and order gating.
+- **Voice-assisted discovery** — browser-supported Web Speech input for product and symptom search, with keyboard-friendly manual search as the dependable fallback.
+- **Rajshahi Care Concierge** — Bangla/English text and voice questions with safety-first care routing and a curated directory for hospitals, doctors, diagnostics, blood support, and emergency contacts.
+- **Trustworthy directory workflow** — public entries must carry a source URL and verification date; admins can publish, update, or archive them without silently deleting history.
+- **Fulfilment controls** — role-based workspaces, transaction-safe stock reservation, cancellation rollback, immutable order snapshots, and inventory administration.
+- **SQL-first foundation** — GUIDs, foreign keys, check constraints, indexes, parameterised queries, migration scripts, and audit timestamps in Microsoft SQL Server / Azure SQL.
 
-- **Customer** — browse products, search medicines, manage cart, place orders, track orders, and review products.
-- **Admin** — manage products, categories, users, orders, inventory, and dashboard analytics.
-- **Pharmacist/Manager** — manage inventory, update stock, verify medicine/product information, and monitor low-stock products.
+## Product boundaries
 
----
+This repository intentionally keeps health and pharmacy operations within safe boundaries.
 
-## ✨ Key Features
+- The Care Concierge is **care navigation**, not a diagnostic model, emergency service, or medication-dosing engine.
+- Prescription-only products require pharmacist approval before checkout. OCR, when enabled, only extracts text; it does not approve a prescription.
+- Blood availability, chamber schedules, and provider contact details must be confirmed with the provider. The directory records the published source and last verification date.
+- A public medicine registry is not a sellable catalogue. Before a product is listed for sale, the operator needs licensed-supplier authority, accurate price and stock, packaging-image rights, prescription classification, and pharmacist review.
 
-### Customer Features
+## Technology
 
-- User registration and login with JWT authentication
-- Browse all medicines and healthcare products
-- Search products by name, category, brand, or symptom
-- Smart symptom-based search for common terms like fever, cough, headache, etc.
-- Filter products by category, price range, stock status, and rating
-- Sort products by newest, price, and popularity
-- Product details page with description, stock, rating, reviews, and safety information
-- Add products to cart
-- Update cart quantity
-- Remove items from cart
-- Cart data persistence using `localStorage`
-- Checkout with Cash on Delivery
-- Prescription-required product warning
-- Prescription acknowledgement required before placing orders with Rx products
-- View personal order history
-- Track order status
-- Add product reviews and ratings
-- Update user profile and address information
-- Prices displayed in Bangladeshi Taka format
+| Area | Implementation |
+| --- | --- |
+| Customer web app | React 18, React Router, Vite, Tailwind CSS |
+| API | Node.js, Express 5, Helmet, express-rate-limit, JWT-backed HTTP-only cookies |
+| Database | Microsoft SQL Server / Azure SQL through `mssql` and `msnodesqlv8` for LocalDB |
+| Files | Prescription documents in SQL Server with role and ownership checks; optional Cloudinary product images |
+| Document extraction | Optional Azure AI Document Intelligence `prebuilt-read` model |
+| Care navigator | Safety-first routing rules plus source-attributed local directory data in SQL Server |
 
----
+## Architecture
 
-### Admin Features
+```text
+React customer & staff portals
+            |
+            v
+Express API ── authentication, validation, rate limits, role checks
+            |
+            +── product catalogue / orders / inventory
+            +── prescription review / protected uploads
+            +── Care Concierge / verified provider directory
+            |
+            v
+Microsoft SQL Server or Azure SQL
+```
 
-- Admin dashboard with key platform statistics
-- Total sales, orders, users, and products overview
-- 7-day sales chart using Recharts
-- Full product management
-  - Add product
-  - Edit product
-  - Delete product
-  - Upload product image
-  - Use image URL fallback
-- Category management
-  - Add category
-  - Edit category
-  - Delete category
-  - View all categories
-- Order management
-  - View all orders
-  - Update order status
-  - Manage customer orders
-- User management
-  - View all users
-  - Change user roles
-  - Activate/deactivate users
-  - Delete users
-- Inventory management
-  - View stock
-  - Update stock
-  - Low-stock alert
-  - Product verification system
+## Repository layout
 
----
+```text
+client/                   React web application
+  src/pages/              Customer, care, checkout, and administration views
+  src/components/         Reusable interface components
+server/                   Express API
+  migrations/             Idempotent SQL Server schema migrations
+  controllers/            Domain and workflow logic
+  routes/                 HTTP route definitions
+  seed/                   Development catalogue and care-directory bootstrap
+  scripts/migrate.js      Migration runner
+```
 
-### Pharmacist / Manager Features
-
-- View product inventory
-- Update product stock
-- Monitor low-stock products
-- Verify or unverify medicine/product information
-- View order information
-- Help maintain product accuracy and safety
-
----
-
-## 🧠 Smart Search Feature
-
-MediMart AI includes a simple rule-based smart search system.
-
-Example search terms:
-
-- `fever`
-- `cough`
-- `cold`
-- `headache`
-- `pain`
-- `vitamin`
-
-When a user searches symptoms, the system maps those terms to related product keywords and shows relevant healthcare products.
-
-This feature is not real medical AI and does not provide medical advice. It is implemented as a safe product discovery feature using predefined symptom-to-keyword mapping.
-
----
-
-## 💊 Prescription Safety
-
-MediMart AI includes prescription-related safety features:
-
-- Products can be marked as prescription-required.
-- Prescription products show an Rx warning badge.
-- Product card, product details, cart, and checkout pages show prescription warnings.
-- Customers must acknowledge the prescription notice before placing an order that contains prescription-required medicine.
-- The backend also validates prescription acknowledgement before creating the order.
-- Admins and pharmacists can verify product information.
-- Verified products show a verification badge to customers.
-
----
-
-## 🧱 Tech Stack
-
-### Frontend
-
-- React.js
-- Vite
-- Tailwind CSS
-- React Router DOM
-- Axios
-- Context API
-- React Hook Form
-- Recharts
-- React Hot Toast
-- React Icons
-
-### Backend
-
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT Authentication
-- bcrypt
-- dotenv
-- cors
-- cookie-parser
-- express-validator
-- Multer
-- Cloudinary
-
----
-
-## 📁 Project Structure
-
-```bash
-medimart-ai/
-├── client/                     # React + Vite frontend
-│   ├── public/
-│   ├── src/
-│   │   ├── api/                # Axios configuration
-│   │   ├── components/         # Reusable UI components
-│   │   ├── context/            # Auth and cart context
-│   │   ├── pages/              # Main application pages
-│   │   ├── pages/admin/        # Admin dashboard pages
-│   │   ├── utils/              # Helper functions
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── .env.example
-│   ├── package.json
-│   ├── tailwind.config.js
-│   └── vite.config.js
-│
-├── server/                     # Express + MongoDB backend
-│   ├── config/                 # Database configuration
-│   ├── controllers/            # Route controller logic
-│   ├── data/                   # Symptom mapping data
-│   ├── middleware/             # Auth, validation, error handler
-│   ├── models/                 # Mongoose models
-│   ├── routes/                 # API routes
-│   ├── seed/                   # Database seed script
-│   ├── utils/                  # JWT and Cloudinary helpers
-│   ├── .env.example
-│   ├── package.json
-│   └── server.js
-│
-├── .gitignore
-└── README.md
-````
-
----
-
-## ⚙️ Installation and Setup
+## Run locally
 
 ### Prerequisites
 
-Make sure the following tools are installed:
+- Node.js 20 or later
+- Microsoft SQL Server 2022+, SQL Server LocalDB, or Azure SQL
+- A SQL login permitted to create and use the Aurevia Care database
 
-* Node.js 18 or newer
-* npm
-* Git
-* MongoDB locally or MongoDB Atlas
-* Cloudinary account for image upload
+### 1. Configure the API
 
----
+Create a database named `aurevia_care`. Then copy `server/.env.example` to `server/.env` and set the database connection values plus a unique, 32-character-or-longer `JWT_SECRET`.
 
-## 1. Clone the Repository
-
-```bash
-git clone https://github.com/shadianoormou/medimart-ai.git
-cd medimart-ai
-```
-
----
-
-## 2. Install Backend Dependencies
-
-```bash
+```powershell
 cd server
 npm install
+npm run db:migrate
 ```
 
----
+For a local starter catalogue and initial Rajshahi care-directory entries, add a real `ADMIN_EMAIL` and a 12-character-or-longer `ADMIN_PASSWORD` to `server/.env`, then run:
 
-## 3. Install Frontend Dependencies
-
-```bash
-cd ../client
-npm install
-```
-
----
-
-## 4. Configure Environment Variables
-
-### Server Environment
-
-Create a `.env` file inside the `server` folder.
-
-```bash
-cd server
-cp .env.example .env
-```
-
-Example `server/.env`:
-
-```env
-PORT=5000
-NODE_ENV=development
-MONGO_URI=mongodb://127.0.0.1:27017/medimart-ai
-JWT_SECRET=your_jwt_secret_key
-JWT_EXPIRE=30d
-CLIENT_URL=http://localhost:5173
-
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-
-ADMIN_EMAIL=admin@medimart.ai
-ADMIN_PASSWORD=Admin@12345
-```
-
-### Client Environment
-
-Create a `.env` file inside the `client` folder.
-
-```bash
-cd client
-cp .env.example .env
-```
-
-Example `client/.env`:
-
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
----
-
-## 5. Seed the Database
-
-Run the seed command from the `server` folder:
-
-```bash
-cd server
+```powershell
 npm run seed
 ```
 
-This will create:
+The seed command is deliberately blocked in production unless `ALLOW_PRODUCTION_SEED=true` has been explicitly configured.
 
-* Admin account
-* Pharmacist/Manager account
-* Customer account
-* Categories
-* Sample products
-* Prescription-required products
-* Non-prescription products
-* Sample reviews
-* Sample order
+### 2. Configure and start the web app
 
-To remove seeded data:
-
-```bash
-npm run seed:destroy
-```
-
----
-
-## 6. Run the Project Locally
-
-Open two terminals.
-
-### Terminal 1 — Backend
-
-```bash
-cd server
-npm run dev
-```
-
-Backend will run at:
-
-```bash
-http://localhost:5000
-```
-
-### Terminal 2 — Frontend
-
-```bash
-cd client
-npm run dev
-```
-
-Frontend will run at:
-
-```bash
-http://localhost:5173
-```
-
----
-
-## 🔑 Demo Login Credentials
-
-After running the seed command, use these demo accounts:
-
-| Role                 | Email                    | Password       |
-| -------------------- | ------------------------ | -------------- |
-| Admin                | `admin@medimart.ai`      | `Admin@12345`  |
-| Pharmacist / Manager | `pharmacist@medimart.ai` | `Pharma@12345` |
-| Customer             | `customer@medimart.ai`   | `Customer@123` |
-
----
-
-## 🛣️ API Overview
-
-### Auth Routes
-
-| Method | Route                | Description                   |
-| ------ | -------------------- | ----------------------------- |
-| POST   | `/api/auth/register` | Register new user             |
-| POST   | `/api/auth/login`    | Login user                    |
-| POST   | `/api/auth/logout`   | Logout user                   |
-| GET    | `/api/auth/profile`  | Get logged-in user profile    |
-| PUT    | `/api/auth/profile`  | Update logged-in user profile |
-
-### Product Routes
-
-| Method | Route                            | Description                                |
-| ------ | -------------------------------- | ------------------------------------------ |
-| GET    | `/api/products`                  | Get all products                           |
-| GET    | `/api/products/:id`              | Get single product                         |
-| GET    | `/api/products/search?q=`        | Search products using smart symptom search |
-| GET    | `/api/products/recommendations`  | Get recommended products                   |
-| POST   | `/api/products/admin`            | Create product                             |
-| PUT    | `/api/products/admin/:id`        | Update product                             |
-| DELETE | `/api/products/admin/:id`        | Delete product                             |
-| PUT    | `/api/products/admin/:id/stock`  | Update product stock                       |
-| PUT    | `/api/products/admin/:id/verify` | Verify or unverify product                 |
-
-### Category Routes
-
-| Method | Route                       | Description        |
-| ------ | --------------------------- | ------------------ |
-| GET    | `/api/categories`           | Get all categories |
-| POST   | `/api/categories/admin`     | Create category    |
-| PUT    | `/api/categories/admin/:id` | Update category    |
-| DELETE | `/api/categories/admin/:id` | Delete category    |
-
-### Order Routes
-
-| Method | Route                          | Description         |
-| ------ | ------------------------------ | ------------------- |
-| POST   | `/api/orders`                  | Place order         |
-| GET    | `/api/orders/my-orders`        | Get customer orders |
-| GET    | `/api/orders/:id`              | Get single order    |
-| GET    | `/api/orders/admin`            | Get all orders      |
-| PUT    | `/api/orders/admin/:id/status` | Update order status |
-
-### Review Routes
-
-| Method | Route                     | Description         |
-| ------ | ------------------------- | ------------------- |
-| POST   | `/api/reviews/:productId` | Add product review  |
-| GET    | `/api/reviews/:productId` | Get product reviews |
-
-### Admin Routes
-
-| Method | Route                  | Description              |
-| ------ | ---------------------- | ------------------------ |
-| GET    | `/api/admin/stats`     | Get dashboard statistics |
-| GET    | `/api/admin/low-stock` | Get low-stock products   |
-| GET    | `/api/admin/users`     | Get all users            |
-| PUT    | `/api/admin/users/:id` | Update user              |
-| DELETE | `/api/admin/users/:id` | Delete user              |
-
----
-
-## 🔒 Security Features
-
-* Password hashing using bcrypt
-* JWT authentication
-* httpOnly cookie support
-* Bearer token fallback
-* Role-based authorization
-* Protected admin routes
-* Protected pharmacist/manager routes
-* Input validation using express-validator
-* Centralized error handling middleware
-* Environment-based configuration
-* No hardcoded secret keys
-* File upload validation for product images
-* Prescription acknowledgement validation on frontend and backend
-
----
-
-## 🌐 Deployment Plan
-
-This project is currently configured for local development.
-
-Recommended deployment platforms:
-
-### Frontend
-
-* Vercel
-* Netlify
-
-### Backend
-
-* Render
-* Railway
-* Cyclic
-
-### Database
-
-* MongoDB Atlas
-
-### Image Upload
-
-* Cloudinary
-
----
-
-## 🧪 Testing Checklist
-
-Before final deployment, test these flows:
-
-* Register new customer
-* Login as customer
-* Browse products
-* Search product by symptom
-* Add product to cart
-* Place normal order
-* Try placing prescription product order without acknowledgement
-* Place prescription product order with acknowledgement
-* Login as admin
-* Add new product
-* Edit product
-* Delete product
-* Add category
-* Update order status
-* Update stock
-* Verify product
-* Login as pharmacist
-* Update inventory
-* Check low-stock products
-
----
-
-## 🛠️ Troubleshooting
-
-### Server npm install issue
-
-If backend dependency installation fails, delete `node_modules` and `package-lock.json`, then run:
-
-```bash
-npm install
-```
-
-This project uses Multer memory storage with Cloudinary upload stream. It does not require `multer-storage-cloudinary`.
-
----
-
-### MongoDB connection issue
-
-For local MongoDB, use:
-
-```env
-MONGO_URI=mongodb://127.0.0.1:27017/medimart-ai
-```
-
-Make sure MongoDB service is running on your computer.
-
-For MongoDB Atlas, use a connection string like:
-
-```env
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/medimart-ai
-```
-
-Also make sure your IP address is allowed in MongoDB Atlas Network Access.
-
----
-
-### Cloudinary upload issue
-
-Check these values in `server/.env`:
-
-```env
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-```
-
-If Cloudinary is not configured, image URL fallback can still be used.
-
----
-
-### CORS issue
-
-Make sure this value in `server/.env` matches your frontend URL:
-
-```env
-CLIENT_URL=http://localhost:5173
-```
-
----
-
-### Frontend API issue
-
-Make sure `client/.env` contains:
-
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-Then restart the frontend server.
-
----
-
-## 📌 Project Status
-
-MediMart AI is completed as a portfolio-ready full-stack MERN project. Future improvements may include:
-
-* Online payment integration
-* Real prescription image upload and verification
-* Advanced AI product recommendation
-* Email notifications
-* Order invoice PDF generation
-* Live deployment
-* Unit and integration testing
-
----
-
-## 👩‍💻 Author
-
-**Shadia Noor Mou**
-
-* GitHub: [shadianoormou](https://github.com/shadianoormou)
-* Project Repository: [MediMart AI](https://github.com/shadianoormou/medimart-ai)
-
----
-
+Copy `client/.env.example` to `client/.env`. The development default is sufficient when the API is running locally because Vite forwards `/api` to port 5000.
 
 ```powershell
-git add README.md
-git commit -m "Update professional README"
-git push
-````
+cd ../client
+npm install
+npm run dev
+```
+
+Start the API separately:
+
+```powershell
+cd ../server
+npm run dev
+```
+
+Open `http://127.0.0.1:5173`.
+
+## Quality checks
+
+```powershell
+# Web production build
+cd client
+npm run build
+
+# Runtime dependency audit
+cd ../server
+npm audit --omit=dev
+```
+
+## Production deployment
+
+Deploy the React client to an HTTPS-capable static host (for example Azure Static Web Apps) and the Express API to Azure App Service, Azure Container Apps, or another managed Node runtime. Use Azure SQL or a managed SQL Server instance for data.
+
+Configure production secrets with the host’s secret manager—never commit them. At a minimum, configure:
+
+```env
+NODE_ENV=production
+DB_SERVER=your-server.database.windows.net
+DB_PORT=1433
+DB_NAME=aurevia_care
+DB_USER=your_sql_login
+DB_PASSWORD=your_strong_password
+DB_ENCRYPT=true
+DB_TRUST_SERVER_CERTIFICATE=false
+JWT_SECRET=a_unique_secret_with_at_least_32_characters
+CLIENT_URL=https://your-web-domain.example
+COOKIE_SAME_SITE=none
+```
+
+Run `npm run db:migrate` against the target database before the API starts. If the web and API apps use different HTTPS domains, keep `COOKIE_SAME_SITE=none`; if they share a domain through a reverse proxy, use `lax` instead. A PCI-compliant payment provider must be integrated server-side before collecting card details.
+
+## Care-directory operations
+
+The initial Rajshahi entries point only to institutional sources such as RMCH, Ibn Sina Trust, Bangladesh Red Crescent Blood Center, Christian Mission Hospital Rajshahi, and the DGHS facility registry. The operating team should verify schedules, contacts, and blood-support availability directly with providers before publishing or refreshing each record.
+
+Public endpoints are intentionally narrow:
+
+```text
+GET  /api/care-navigator/directory?kind=doctor&q=orthopedics
+POST /api/care-navigator/ask  { "message": "হাড়ে ব্যথা হলে কোন ডাক্তার?" }
+```
+
+## Security and privacy
+
+- Cookies are HTTP-only and authenticated routes use role checks.
+- Authentication and care-navigator endpoints are rate limited, and Express security headers are enabled.
+- SQL inputs use parameterised queries; product sort and filter values are allowlisted.
+- Product deletion archives records. User deletion deactivates an account so clinical and fulfilment history is retained.
+- Prescription files are restricted to the owner and authorised pharmacy staff.
+- Never commit `.env` files, connection strings, JWT secrets, cloud-storage credentials, or Azure AI credentials.
+
+## Licensing
+
+This is a private client project. The code, design, content, and operational data may not be reused, redistributed, or deployed without the project owner’s written permission.
+
+---
+
+Built as a professional foundation for a pharmacist-led digital care business in Bangladesh.

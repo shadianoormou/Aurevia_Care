@@ -33,8 +33,9 @@ const Register = () => {
   return (
     <div className="max-w-md mx-auto px-4 py-16">
       <div className="card p-8">
-        <h1 className="text-2xl font-bold text-gray-900 text-center">Create Account</h1>
-        <p className="text-sm text-gray-500 text-center mt-1">Join MediMart AI today</p>
+        <p className="text-xs uppercase tracking-[0.16em] text-accent-600 font-bold text-center">Aurevia Care</p>
+        <h1 className="text-2xl font-bold text-primary-900 text-center mt-1">Create your care account</h1>
+        <p className="text-sm text-gray-500 text-center mt-1">Secure your prescriptions, orders, and delivery details.</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
           <div>
@@ -58,7 +59,7 @@ const Register = () => {
             <label className="text-sm text-gray-600">Password</label>
             <input
               type="password"
-              {...register("password", { required: "Password is required", minLength: { value: 6, message: "Minimum 6 characters" } })}
+                {...register("password", { required: "Password is required", minLength: { value: 10, message: "Minimum 10 characters" } })}
               className="input-field mt-1"
             />
             {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>}
@@ -77,6 +78,7 @@ const Register = () => {
             {errors.confirmPassword && <p className="text-xs text-red-500 mt-1">{errors.confirmPassword.message}</p>}
           </div>
 
+          <p className="text-xs text-slate-500">Use at least 10 characters and avoid reusing a password from another service.</p>
           <button type="submit" disabled={submitting} className="btn-primary w-full">
             {submitting ? "Creating account..." : "Register"}
           </button>

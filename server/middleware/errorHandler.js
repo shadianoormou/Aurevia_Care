@@ -7,28 +7,22 @@ export const notFound = (req, res, next) => {
 
 // Centralized error handler - keeps error responses consistent
 export const errorHandler = (err, req, res, next) => {
-  let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  let statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
   let message = err.message || "Server Error";
 
-  // Mongoose bad ObjectId
-  if (err.name === "CastError" && err.kind === "ObjectId") {
-    statusCode = 404;
-    message = "Resource not found";
+  if (err.code === "LIMIT_FILE_SIZE") {
+    statusCode = 413;
+    message = "Uploaded file is larger than the allowed limit";
   }
 
-  // Mongoose duplicate key error
-  if (err.code === 11000) {
-    statusCode = 400;
-    const field = Object.keys(err.keyValue || {})[0];
-    message = `Duplicate value for field: ${field}`;
+  // SQL Server unique-constraint and foreign-key errors should not leak schema details.
+  if (err.number === 2627 || err.number === 2601) {
+    statusCode = 409;
+    message = "A record with those details already exists";
   }
-
-  // Mongoose validation error
-  if (err.name === "ValidationError") {
-    statusCode = 400;
-    message = Object.values(err.errors)
-      .map((val) => val.message)
-      .join(", ");
+  if (err.number === 547) {
+    statusCode = 409;
+    message = "This change conflicts with data already in use";
   }
 
   res.status(statusCode).json({

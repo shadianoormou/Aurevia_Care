@@ -1,71 +1,74 @@
-import Category from "../models/Category.js";
-import Product from "../models/Product.js";
+import { createRequest, sql } from "../config/db.js";
+import { cleanText, httpError, requireUuid } from "../utils/http.js";
+import { serializeCategory } from "../utils/serializers.js";
 
-// @desc    Get all categories
-// @route   GET /api/categories
-// @access  Public
+const categoryColumns = "Id, Name, Description, Icon, SortOrder, IsFeatured, CreatedAt, UpdatedAt";
+const outputColumns = categoryColumns.replaceAll(", ", ", inserted.");
+
+const categoryInput = (request, body) => {
+  const name = cleanText(body.name, 120);
+  if (!name) throw httpError("Category name is required");
+  request.input("name", sql.NVarChar(120), name);
+  request.input("description", sql.NVarChar(1000), cleanText(body.description, 1000) || null);
+  request.input("icon", sql.NVarChar(20), cleanText(body.icon, 20) || null);
+};
+
 export const getCategories = async (req, res, next) => {
   try {
-    const categories = await Category.find().sort({ name: 1 });
-    res.status(200).json({ success: true, categories });
-  } catch (error) {
-    next(error);
-  }
+    const request = await createRequest();
+    const { recordsets } = await request.batch(`
+      SELECT ${categoryColumns} FROM dbo.Categories ORDER BY IsFeatured DESC, SortOrder ASC, Name ASC;
+      SELECT Id, CategoryId, Name, Description, Icon, SortOrder, IsActive
+      FROM dbo.Subcategories WHERE IsActive = 1 ORDER BY SortOrder ASC, Name ASC;
+    `);
+    const subcategoriesByCategory = new Map();
+    recordsets[1].forEach((row) => {
+      const current = subcategoriesByCategory.get(row.CategoryId) || [];
+      current.push({ _id: row.Id, name: row.Name, description: row.Description || "", icon: row.Icon || "", sortOrder: Number(row.SortOrder) });
+      subcategoriesByCategory.set(row.CategoryId, current);
+    });
+    res.status(200).json({
+      success: true,
+      categories: recordsets[0].map((row) => ({ ...serializeCategory(row), subcategories: subcategoriesByCategory.get(row.Id) || [] })),
+    });
+  } catch (error) { next(error); }
 };
 
-// @desc    Create category
-// @route   POST /api/categories/admin
-// @access  Private/Admin
 export const createCategory = async (req, res, next) => {
   try {
-    const category = await Category.create(req.body);
-    res.status(201).json({ success: true, category });
-  } catch (error) {
-    next(error);
-  }
+    const request = await createRequest();
+    categoryInput(request, req.body);
+    const { recordset } = await request.query(`INSERT INTO dbo.Categories (Name, Description, Icon)
+      OUTPUT inserted.${outputColumns} VALUES (@name, @description, @icon)`);
+    res.status(201).json({ success: true, category: serializeCategory(recordset[0]) });
+  } catch (error) { next(error); }
 };
 
-// @desc    Update category
-// @route   PUT /api/categories/admin/:id
-// @access  Private/Admin
 export const updateCategory = async (req, res, next) => {
   try {
-    const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!category) {
-      return res.status(404).json({ success: false, message: "Category not found" });
-    }
-
-    res.status(200).json({ success: true, category });
-  } catch (error) {
-    next(error);
-  }
+    requireUuid(req.params.id, "category ID");
+    const request = await createRequest();
+    categoryInput(request, req.body);
+    request.input("id", sql.UniqueIdentifier, req.params.id);
+    const { recordset } = await request.query(`UPDATE dbo.Categories SET Name = @name,
+      Description = @description, Icon = @icon, UpdatedAt = SYSUTCDATETIME()
+      OUTPUT inserted.${outputColumns} WHERE Id = @id`);
+    if (!recordset[0]) throw httpError("Category not found", 404);
+    res.status(200).json({ success: true, category: serializeCategory(recordset[0]) });
+  } catch (error) { next(error); }
 };
 
-// @desc    Delete category
-// @route   DELETE /api/categories/admin/:id
-// @access  Private/Admin
 export const deleteCategory = async (req, res, next) => {
   try {
-    const inUse = await Product.countDocuments({ category: req.params.id });
-    if (inUse > 0) {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot delete: ${inUse} product(s) still use this category`,
-      });
-    }
-
-    const category = await Category.findByIdAndDelete(req.params.id);
-
-    if (!category) {
-      return res.status(404).json({ success: false, message: "Category not found" });
-    }
-
+    requireUuid(req.params.id, "category ID");
+    const checkRequest = await createRequest();
+    checkRequest.input("id", sql.UniqueIdentifier, req.params.id);
+    const check = await checkRequest.query("SELECT COUNT(1) AS Count FROM dbo.Products WHERE CategoryId = @id");
+    if (Number(check.recordset[0].Count) > 0) throw httpError("Cannot delete a category while products use it");
+    const deleteRequest = await createRequest();
+    deleteRequest.input("id", sql.UniqueIdentifier, req.params.id);
+    const result = await deleteRequest.query("DELETE FROM dbo.Categories WHERE Id = @id");
+    if (!result.rowsAffected[0]) throw httpError("Category not found", 404);
     res.status(200).json({ success: true, message: "Category deleted successfully" });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };

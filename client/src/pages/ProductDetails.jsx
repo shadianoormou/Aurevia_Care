@@ -72,7 +72,7 @@ const ProductDetails = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <div className="grid md:grid-cols-2 gap-10">
         <img
-          src={product.image || "https://placehold.co/600x500?text=MediMart"}
+          src={product.image || "https://placehold.co/600x500?text=Aurevia+Care"}
           alt={product.name}
           className="w-full rounded-xl border border-gray-100 object-cover max-h-[420px]"
         />
@@ -103,8 +103,8 @@ const ProductDetails = () => {
           {product.requiresPrescription && (
             <p className="flex items-start gap-2 text-xs bg-accent-50 text-accent-700 rounded px-3 py-2 mt-3">
               <FiAlertTriangle className="shrink-0 mt-0.5" />
-              This medicine requires a valid prescription. You will be asked to confirm
-              this at checkout.
+              This medicine requires a verified prescription. Submit it securely in the
+              Prescription Centre before checkout.
             </p>
           )}
 

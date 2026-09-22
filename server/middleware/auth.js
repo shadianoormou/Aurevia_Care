@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+import { createRequest, sql } from "../config/db.js";
+import { serializeUser } from "../utils/serializers.js";
 
 // Verifies the JWT token (from cookie or Authorization header)
 // and attaches the logged-in user to req.user
@@ -25,7 +26,14 @@ export const protect = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.id);
+    const request = await createRequest();
+    request.input("id", sql.UniqueIdentifier, decoded.id);
+    const { recordset } = await request.query(`
+      SELECT Id, Name, Email, Phone, AddressStreet, AddressCity, AddressState,
+             AddressZipCode, AddressCountry, Role, IsActive, CreatedAt, UpdatedAt
+      FROM dbo.Users WHERE Id = @id
+    `);
+    const user = recordset[0] ? serializeUser(recordset[0]) : null;
     if (!user || !user.isActive) {
       return res.status(401).json({
         success: false,

@@ -3,56 +3,73 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
-import connectDB from "./config/db.js";
+import { connectDB } from "./config/db.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
-
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import prescriptionRoutes from "./routes/prescriptionRoutes.js";
+import careNavigatorRoutes from "./routes/careNavigatorRoutes.js";
 
 dotenv.config();
-connectDB();
 
 const app = express();
+const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 
-// ---- Global Middleware ----
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    credentials: true,
-  })
-);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.disable("x-powered-by");
+app.set("trust proxy", 1);
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+app.use(cors({
+  origin: clientUrl,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { success: false, message: "Too many requests. Please try again later." },
+}));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cookieParser());
 
-if (process.env.NODE_ENV !== "production") {
-  app.use(morgan("dev"));
-}
+if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
 
-// ---- Health check ----
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ success: true, message: "MediMart AI API is running" });
+  res.status(200).json({ success: true, service: "Aurevia Care API", database: "SQL Server", status: "healthy" });
 });
 
-// ---- API Routes ----
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/prescriptions", prescriptionRoutes);
+app.use("/api/care-navigator", careNavigatorRoutes);
 
-// ---- Error Handling ----
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
+const startServer = async () => {
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+    throw new Error("JWT_SECRET must be set to a unique value of at least 32 characters");
+  }
+  await connectDB();
+  app.listen(PORT, () => console.log(`Aurevia Care API running on port ${PORT} [${process.env.NODE_ENV || "development"}]`));
+};
 
-app.listen(PORT, () => {
-  console.log(`🚀 MediMart AI server running on port ${PORT} [${process.env.NODE_ENV || "development"}]`);
+startServer().catch((error) => {
+  console.error(`Server startup failed: ${error.message}`);
+  process.exit(1);
 });

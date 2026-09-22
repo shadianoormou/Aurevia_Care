@@ -26,14 +26,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const { data } = await api.post("/auth/login", { email, password });
-    localStorage.setItem("medimart_token", data.token);
     setUser(data.user);
     return data.user;
   };
 
   const register = async (formData) => {
     const { data } = await api.post("/auth/register", formData);
-    localStorage.setItem("medimart_token", data.token);
     setUser(data.user);
     return data.user;
   };
@@ -44,7 +42,6 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       // ignore network errors on logout
     }
-    localStorage.removeItem("medimart_token");
     setUser(null);
   };
 

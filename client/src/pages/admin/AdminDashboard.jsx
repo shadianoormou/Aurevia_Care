@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { FiUsers, FiPackage, FiShoppingBag, FiDollarSign, FiAlertTriangle, FiGrid } from "react-icons/fi";
+import { FiUsers, FiPackage, FiShoppingBag, FiDollarSign, FiAlertTriangle, FiGrid, FiCompass } from "react-icons/fi";
+import { FiFileText } from "react-icons/fi";
 import api from "../../api/axios.js";
 import Loader from "../../components/Loader.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -94,6 +95,10 @@ const AdminDashboard = () => {
               <FiUsers className="text-primary-600 text-xl mb-2" />
               <p className="font-medium text-gray-900 text-sm">Manage Users</p>
             </Link>
+            <Link to="/admin/care-directory" className="card p-5 hover:shadow-md transition-shadow">
+              <FiCompass className="text-primary-600 text-xl mb-2" />
+              <p className="font-medium text-gray-900 text-sm">Care Directory</p>
+            </Link>
           </>
         )}
         <Link to="/admin/orders" className="card p-5 hover:shadow-md transition-shadow">
@@ -103,6 +108,10 @@ const AdminDashboard = () => {
         <Link to="/admin/inventory" className="card p-5 hover:shadow-md transition-shadow">
           <FiAlertTriangle className="text-primary-600 text-xl mb-2" />
           <p className="font-medium text-gray-900 text-sm">Inventory</p>
+        </Link>
+        <Link to="/admin/prescriptions" className="card p-5 hover:shadow-md transition-shadow">
+          <FiFileText className="text-primary-600 text-xl mb-2" />
+          <p className="font-medium text-gray-900 text-sm">Prescription Queue</p>
         </Link>
       </div>
 

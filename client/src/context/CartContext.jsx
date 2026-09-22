@@ -5,7 +5,7 @@ const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
-const STORAGE_KEY = "medimart_cart";
+const STORAGE_KEY = "aurevia_cart";
 
 export const CartProvider = ({ children }) => {
   // Cart persistence using localStorage

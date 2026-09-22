@@ -1,72 +1,58 @@
-import Review from "../models/Review.js";
-import Product from "../models/Product.js";
+import { createRequest, sql, withTransaction } from "../config/db.js";
+import { cleanText, httpError, requireUuid } from "../utils/http.js";
+import { serializeReview } from "../utils/serializers.js";
 
-// Recalculates a product's average rating and review count
-const recalculateProductRating = async (productId) => {
-  const reviews = await Review.find({ product: productId });
-  const numReviews = reviews.length;
-  const rating = numReviews
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / numReviews
-    : 0;
+const reviewColumns = "Id, ProductId, UserId, Name, Rating, Comment, CreatedAt, UpdatedAt";
+const outputColumns = reviewColumns.replaceAll(", ", ", inserted.");
 
-  await Product.findByIdAndUpdate(productId, {
-    rating: Number(rating.toFixed(1)),
-    numReviews,
-  });
+const refreshRating = async (productId, transaction) => {
+  const request = await createRequest(transaction);
+  request.input("productId", sql.UniqueIdentifier, productId);
+  await request.query(`
+    UPDATE dbo.Products SET
+      Rating = COALESCE((SELECT CAST(AVG(CAST(Rating AS DECIMAL(4,2))) AS DECIMAL(3,2)) FROM dbo.Reviews WHERE ProductId = @productId), 0),
+      NumReviews = (SELECT COUNT(1) FROM dbo.Reviews WHERE ProductId = @productId),
+      UpdatedAt = SYSUTCDATETIME()
+    WHERE Id = @productId
+  `);
 };
 
-// @desc    Add a review to a product
-// @route   POST /api/reviews/:productId
-// @access  Private
 export const addReview = async (req, res, next) => {
   try {
-    const { rating, comment } = req.body;
-    const { productId } = req.params;
-
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+    requireUuid(req.params.productId, "product ID");
+    const rating = Number(req.body.rating);
+    const comment = cleanText(req.body.comment, 2000);
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5 || !comment) {
+      throw httpError("A rating from 1 to 5 and a comment are required");
     }
+    const review = await withTransaction(async (transaction) => {
+      const productRequest = await createRequest(transaction);
+      productRequest.input("productId", sql.UniqueIdentifier, req.params.productId);
+      const product = await productRequest.query("SELECT Id FROM dbo.Products WITH (UPDLOCK, HOLDLOCK) WHERE Id = @productId AND IsActive = 1");
+      if (!product.recordset[0]) throw httpError("Product not found", 404);
 
-    const alreadyReviewed = await Review.findOne({
-      product: productId,
-      user: req.user._id,
+      const request = await createRequest(transaction);
+      request.input("productId", sql.UniqueIdentifier, req.params.productId);
+      request.input("userId", sql.UniqueIdentifier, req.user._id);
+      request.input("name", sql.NVarChar(120), req.user.name);
+      request.input("rating", sql.TinyInt, rating);
+      request.input("comment", sql.NVarChar(2000), comment);
+      const result = await request.query(`INSERT INTO dbo.Reviews (ProductId, UserId, Name, Rating, Comment)
+        OUTPUT inserted.${outputColumns} VALUES (@productId, @userId, @name, @rating, @comment)`);
+      await refreshRating(req.params.productId, transaction);
+      return result.recordset[0];
     });
-
-    if (alreadyReviewed) {
-      return res.status(400).json({
-        success: false,
-        message: "You have already reviewed this product",
-      });
-    }
-
-    const review = await Review.create({
-      product: productId,
-      user: req.user._id,
-      name: req.user.name,
-      rating,
-      comment,
-    });
-
-    await recalculateProductRating(productId);
-
-    res.status(201).json({ success: true, review });
-  } catch (error) {
-    next(error);
-  }
+    res.status(201).json({ success: true, review: serializeReview(review) });
+  } catch (error) { next(error); }
 };
 
-// @desc    Get all reviews for a product
-// @route   GET /api/reviews/:productId
-// @access  Public
 export const getProductReviews = async (req, res, next) => {
   try {
-    const reviews = await Review.find({ product: req.params.productId }).sort({
-      createdAt: -1,
-    });
-
-    res.status(200).json({ success: true, count: reviews.length, reviews });
-  } catch (error) {
-    next(error);
-  }
+    requireUuid(req.params.productId, "product ID");
+    const request = await createRequest();
+    request.input("productId", sql.UniqueIdentifier, req.params.productId);
+    const { recordset } = await request.query(`SELECT ${reviewColumns} FROM dbo.Reviews
+      WHERE ProductId = @productId ORDER BY CreatedAt DESC`);
+    res.status(200).json({ success: true, count: recordset.length, reviews: recordset.map(serializeReview) });
+  } catch (error) { next(error); }
 };

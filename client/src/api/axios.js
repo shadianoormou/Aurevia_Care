@@ -8,14 +8,4 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Also attach token from localStorage as a fallback (in case cookies
-// are blocked, e.g. some browser privacy settings)
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("medimart_token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
 export default api;

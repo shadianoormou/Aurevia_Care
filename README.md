@@ -191,7 +191,7 @@ npm audit --omit=dev
 
 ### Authentication configuration
 
-Phone registration is available with a password and normalises Bangladesh numbers to `+8801XXXXXXXXX`. Google sign-in is intentionally disabled until the same OAuth Web Client ID is configured in both environments:
+Phone registration is available with a password and normalises Bangladesh numbers to `+8801XXXXXXXXX`. Google sign-in uses one OAuth Web Client ID in both the Vite client and Express API:
 
 ```env
 # client/.env
@@ -201,7 +201,7 @@ VITE_GOOGLE_CLIENT_ID=your_web_client_id.apps.googleusercontent.com
 GOOGLE_CLIENT_ID=your_web_client_id.apps.googleusercontent.com
 ```
 
-Add `http://localhost:5173` (and the production HTTPS origin) to the Google OAuth authorised JavaScript origins. Never commit OAuth secrets, JWT secrets, SQL credentials, or administrator passwords. The bootstrap administrator requires a unique password of at least 12 characters; weak passwords such as `0000` are rejected by design.
+Add both local origins (`http://127.0.0.1:5173` and `http://localhost:5173`) plus the production HTTPS origin to the Google OAuth authorised JavaScript origins. Set the same two environment variables in the hosting platform; the local values are intentionally ignored by Git. Never commit OAuth secrets, JWT secrets, SQL credentials, or administrator passwords. The bootstrap administrator requires a unique password of at least 12 characters; weak passwords such as `0000` are rejected by design.
 
 ## Production deployment
 

@@ -1,11 +1,13 @@
 import { createRequest, sql } from "../config/db.js";
 import { httpError } from "../utils/http.js";
+import { matchBangladeshLocation, serializeLocationOptions, normalizeLocationPart } from "../utils/bangladeshLocations.js";
 
 const allowedKinds = new Set(["doctor", "facility", "diagnostic", "blood_bank", "emergency"]);
 
 const selectColumns = `
   Id, Kind, Name, Specialty, ConditionsJson, Address, Phone, Email, Availability,
-  VerificationNote, SourceLabel, SourceUrl, LastVerifiedAt, IsPublished, CreatedAt, UpdatedAt
+  VerificationNote, SourceLabel, SourceUrl, LastVerifiedAt, IsPublished, Division, District, Upazila, Country,
+  CreatedAt, UpdatedAt
 `;
 
 const serializeEntry = (row) => ({
@@ -23,6 +25,13 @@ const serializeEntry = (row) => ({
   sourceUrl: row.SourceUrl,
   lastVerifiedAt: row.LastVerifiedAt,
   isPublished: Boolean(row.IsPublished),
+  location: {
+    country: row.Country || "Bangladesh",
+    division: row.Division || null,
+    district: row.District || null,
+    upazila: row.Upazila || null,
+    label: [...new Set([row.Upazila, row.District, row.Division].filter(Boolean))].join(", ") || "Bangladesh",
+  },
 });
 
 const compact = (value) => String(value || "").trim().replace(/\s+/g, " ");
@@ -30,6 +39,7 @@ const includesAny = (message, terms) => terms.some((term) => message.includes(te
 
 const triagePlan = (rawMessage) => {
   const message = rawMessage.toLowerCase();
+  const location = matchBangladeshLocation(rawMessage);
   const emergencyTerms = [
     "chest pain", "বুকে ব্যথা", "difficulty breathing", "shortness of breath", "শ্বাস কষ্ট", "শ্বাসকষ্ট",
     "unconscious", "faint", "অজ্ঞান", "severe bleeding", "রক্তক্ষরণ", "stroke", "paralysis", "প্যারালাইসিস",
@@ -42,25 +52,28 @@ const triagePlan = (rawMessage) => {
       specialty: "Emergency care",
       headline: "জরুরি সহায়তা দরকার হতে পারে",
       message: "এটি online diagnosis নয়। এখনই নিকটস্থ emergency department-এ যান বা জরুরি সহায়তা নিন—chat-এ অপেক্ষা করবেন না।",
-      nextStep: "রাজশাহীতে RMCH emergency desk বা জাতীয় জরুরি সেবা 999-এ যোগাযোগ করুন।",
+      nextStep: "নিকটস্থ emergency department-এ যান বা জাতীয় জরুরি সেবা 999-এ যোগাযোগ করুন।",
+      location,
     };
   }
   if (includesAny(message, ["blood", "blood bank", "রক্ত", "ব্লাড", "donor", "রক্তদাতা"])) {
     return {
-      urgency: "priority", kind: "blood_bank", specialty: "Blood support", headline: "রাজশাহীর blood-support contacts",
+      urgency: "priority", kind: "blood_bank", specialty: "Blood support", headline: location ? `${location.label}-এর blood-support contacts` : "আপনার এলাকার blood-support contacts",
       message: "রক্তের stock এবং compatibility দ্রুত বদলাতে পারে—যাওয়ার আগে অবশ্যই ফোনে availability ও hospital requirement নিশ্চিত করুন।",
       nextStep: "প্রয়োজনীয় blood group, রোগীর hospital এবং exchange/donor requirement প্রস্তুত রাখুন।",
+      location,
     };
   }
 
   const routes = [
+    [["toothache", "tooth pain", "dental pain", "gum pain", "tooth ache", "dath betha", "daat betha", "dant betha", "dat betha", "dath", "দাঁত ব্যথা", "দাঁতের ব্যথা", "দাত ব্যথা", "দাঁতের যন্ত্রণা", "মাড়ি ব্যথা", "মাড়ি ব্যথা", "দাঁত", "দাত", "দাঁতের"], "Dental", "দাঁত ও মুখের care"],
     [["pregnan", "period", "menstrual", "gynae", "gyne", "গর্ভ", "প্রেগ", "মাসিক", "নারী"], "Gynecology & obstetrics", "নারী ও প্রসূতি care"],
     [["child", "baby", "infant", "pediatric", "paediatric", "শিশু", "বাচ্চা"], "Pediatrics", "শিশু care"],
     [["skin", "rash", "acne", "allergy", "চামড়া", "ত্বক", "ফুসকুড়ি", "এলার্জ"], "Dermatology", "ত্বক ও allergy care"],
     [["eye", "vision", "চোখ", "দৃষ্টি"], "Ophthalmology", "চোখের care"],
     [["tooth", "dental", "gum", "দাঁত", "মাড়ি"], "Dental", "dental care"],
     [["bone", "joint", "fracture", "back pain", "হাড়", "জয়েন্ট", "ভাঙা", "কোমর"], "Orthopedics", "হাড় ও joint care"],
-    [["heart", "palpitation", "cardiac", "হার্ট", "হৃদ"], "Cardiology", "heart care"],
+    [["heart", "palpitation", "cardiac", "heart pain", "buk dhorfor", "buk dorfor", "হার্ট", "হৃদ", "বুক ধড়ফড়", "বুক ধড়ফড়"], "Cardiology", "heart care"],
     [["headache", "migraine", "neurology", "head", "মাথাব্যথা", "মাইগ্রেন", "নিউরো"], "Neurology", "neurology care"],
     [["cough", "asthma", "breathing", "chest", "কাশি", "হাঁপানি", "শ্বাস"], "Chest & respiratory medicine", "respiratory care"],
     [["diabetes", "thyroid", "sugar", "ডায়াবেটিস", "থাইরয়েড", "সুগার"], "Medicine / endocrinology", "diabetes ও hormone care"],
@@ -76,21 +89,29 @@ const triagePlan = (rawMessage) => {
       ? `আপনার বলা বিষয়টির জন্য ${specialty} department-এর clinician-এর সাথে কথা বলা উপযোগী হতে পারে।`
       : "লক্ষণটি যদি নতুন, স্থায়ী বা বাড়তে থাকে, General Medicine/OPD দিয়ে শুরু করুন; তারা প্রয়োজন হলে specialist route দেবেন।",
     nextStep: "নিচের verified directory থেকে appointment line-এ কল করে সময় নিশ্চিত করুন।",
+    location,
   };
 };
 
-const findEntries = async ({ kind, query, limit = 8, includeUnpublished = false }) => {
+const findEntries = async ({ kind, query, division, district, upazila, limit = 8, includeUnpublished = false }) => {
   const request = await createRequest();
   request.input("kind", sql.VarChar(24), kind || null);
   request.input("query", sql.NVarChar(240), query || null);
+  request.input("division", sql.NVarChar(80), division || null);
+  request.input("district", sql.NVarChar(80), district || null);
+  request.input("upazila", sql.NVarChar(120), upazila || null);
   request.input("limit", sql.Int, Math.min(Math.max(Number(limit) || 8, 1), 30));
   const { recordset } = await request.query(`
     SELECT TOP (@limit) ${selectColumns}
     FROM dbo.CareDirectoryEntries
     WHERE (${includeUnpublished ? "1 = 1" : "IsPublished = 1"})
       AND (@kind IS NULL OR Kind = @kind)
+      AND (@division IS NULL OR Division = @division)
+      AND (@district IS NULL OR District = @district)
+      AND (@upazila IS NULL OR Upazila = @upazila)
       AND (@query IS NULL OR Name LIKE '%' + @query + '%' OR Specialty LIKE '%' + @query + '%'
-        OR ConditionsJson LIKE '%' + @query + '%' OR Address LIKE '%' + @query + '%')
+        OR ConditionsJson LIKE '%' + @query + '%' OR Address LIKE '%' + @query + '%'
+        OR Division LIKE '%' + @query + '%' OR District LIKE '%' + @query + '%' OR Upazila LIKE '%' + @query + '%')
     ORDER BY CASE WHEN Specialty LIKE '%' + COALESCE(@query, '') + '%' THEN 0 ELSE 1 END,
       LastVerifiedAt DESC, Name ASC
   `);
@@ -101,14 +122,29 @@ export const getDirectory = async (req, res, next) => {
   try {
     const kind = compact(req.query.kind);
     if (kind && !allowedKinds.has(kind)) throw httpError("Unsupported directory type");
-    const entries = await findEntries({ kind, query: compact(req.query.q), limit: req.query.limit || 18 });
+    const requestedLocation = compact(req.query.location || req.query.city || "");
+    const location = matchBangladeshLocation(requestedLocation) || {
+      division: normalizeLocationPart(req.query.division),
+      district: normalizeLocationPart(req.query.district),
+      upazila: normalizeLocationPart(req.query.upazila),
+      label: [req.query.upazila, req.query.district, req.query.division].filter(Boolean).join(", ") || "Bangladesh",
+    };
+    const hasLocation = Boolean(location.division || location.district || location.upazila);
+    const entries = await findEntries({ kind, query: compact(req.query.q), ...(hasLocation ? location : {}), limit: req.query.limit || 18 });
     res.status(200).json({
       success: true,
-      city: "Rajshahi",
+      scope: location.label || "Bangladesh",
+      location,
+      coverage: entries.length ? "verified_records" : "no_published_records_for_location",
+      locations: serializeLocationOptions(),
       sourcePolicy: "Only published, source-attributed directory entries are returned.",
       entries,
     });
   } catch (error) { next(error); }
+};
+
+export const getLocations = async (_req, res) => {
+  res.status(200).json({ success: true, country: "Bangladesh", locations: serializeLocationOptions() });
 };
 
 export const askConcierge = async (req, res, next) => {
@@ -116,14 +152,18 @@ export const askConcierge = async (req, res, next) => {
     const message = compact(req.body.message);
     if (message.length < 2 || message.length > 800) throw httpError("Enter a question between 2 and 800 characters");
     const plan = triagePlan(message);
-    let entries = await findEntries({ kind: plan.kind, query: plan.kind === "blood_bank" ? "" : plan.specialty, limit: 6 });
-    if (!entries.length) entries = await findEntries({ kind: plan.kind, query: "", limit: 6 });
+    const location = plan.location || {};
+    const locationFilter = location.division || location.district ? { division: location.division, district: location.district, upazila: location.upazila } : {};
+    let entries = await findEntries({ kind: plan.kind, query: plan.kind === "blood_bank" ? "" : plan.specialty, ...locationFilter, limit: 6 });
+    if (!entries.length) entries = await findEntries({ kind: plan.kind, query: "", ...locationFilter, limit: 6 });
     if (!entries.length && plan.kind === "doctor") {
-      entries = await findEntries({ kind: "facility", query: "", limit: 4 });
+      entries = await findEntries({ kind: "facility", query: "", ...locationFilter, limit: 4 });
     }
     res.status(200).json({
       success: true,
-      city: "Rajshahi",
+      scope: location.label || "Bangladesh",
+      location: location.label ? location : null,
+      coverage: entries.length ? "verified_records" : "no_published_records_for_location",
       careRoute: plan,
       entries,
       safety: "Aurevia Concierge provides directory navigation, not diagnosis, prescriptions, medicine doses, or emergency triage replacement.",
@@ -131,4 +171,4 @@ export const askConcierge = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-export { allowedKinds, findEntries, serializeEntry };
+export { allowedKinds, findEntries, serializeEntry, triagePlan };

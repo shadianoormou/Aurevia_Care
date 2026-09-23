@@ -253,9 +253,13 @@ try {
     request.input("sourceLabel", sql.NVarChar(180), entry.sourceLabel);
     request.input("sourceUrl", sql.NVarChar(2048), entry.sourceUrl);
     request.input("verified", sql.Date, "2026-09-22");
+    request.input("division", sql.NVarChar(80), entry.division || "Rajshahi");
+    request.input("district", sql.NVarChar(80), entry.district || "Rajshahi");
+    request.input("upazila", sql.NVarChar(120), entry.upazila || "Rajshahi City");
+    request.input("country", sql.NVarChar(80), entry.country || "Bangladesh");
     await request.query(`INSERT INTO dbo.CareDirectoryEntries
-      (Kind, Name, Specialty, ConditionsJson, Address, Phone, Email, Availability, VerificationNote, SourceLabel, SourceUrl, LastVerifiedAt)
-      VALUES (@kind, @name, @specialty, @conditions, @address, @phone, @email, @availability, @note, @sourceLabel, @sourceUrl, @verified)`);
+      (Kind, Name, Specialty, ConditionsJson, Address, Phone, Email, Availability, VerificationNote, SourceLabel, SourceUrl, LastVerifiedAt, Division, District, Upazila, Country)
+      VALUES (@kind, @name, @specialty, @conditions, @address, @phone, @email, @availability, @note, @sourceLabel, @sourceUrl, @verified, @division, @district, @upazila, @country)`);
   }
   await pool.close();
   console.log("Aurevia Care bootstrap catalogue and Rajshahi care directory imported.");

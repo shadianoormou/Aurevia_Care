@@ -1,6 +1,6 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
-import { askConcierge, getDirectory } from "../controllers/careNavigatorController.js";
+import { askConcierge, getDirectory, getLocations } from "../controllers/careNavigatorController.js";
 
 const router = express.Router();
 const conciergeLimiter = rateLimit({
@@ -12,6 +12,7 @@ const conciergeLimiter = rateLimit({
 });
 
 router.get("/directory", getDirectory);
+router.get("/locations", getLocations);
 router.post("/ask", conciergeLimiter, askConcierge);
 
 export default router;

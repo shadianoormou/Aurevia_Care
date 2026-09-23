@@ -5,6 +5,7 @@ import {
 import api from "../api/axios.js";
 
 const QUICK_PROMPTS = [
+  "Dhaka-তে দাঁতের ব্যথার জন্য কোন ডাক্তার?",
   "Rajshahi blood bank",
   "কাশি হলে কোন ডাক্তার?",
   "হাড়ে ব্যথা হলে কোথায় যাব?",
@@ -39,7 +40,7 @@ const CareConcierge = ({ className = "" }) => {
   const [conversation, setConversation] = useState([
     {
       id: "welcome", role: "assistant",
-      text: "আমি Rajshahi Care Concierge। সমস্যা লিখুন বা বলুন—আমি verified contact ও কোন department দিয়ে শুরু করবেন তা দেখাব।",
+      text: "আমি Aurevia Care Concierge। Bangladesh-এর যেকোনো district বা division লিখে সমস্যা বলুন—আমি symptom অনুযায়ী department route এবং ওই location-এর verified contact খুঁজব।",
     },
   ]);
   const [sending, setSending] = useState(false);
@@ -55,7 +56,7 @@ const CareConcierge = ({ className = "" }) => {
       const { data } = await api.post("/care-navigator/ask", { message });
       setConversation((current) => [...current, {
         id: `answer-${Date.now()}`, role: "assistant", text: data.careRoute.message,
-        route: data.careRoute, entries: data.entries,
+        route: data.careRoute, entries: data.entries, scope: data.scope, coverage: data.coverage,
       }]);
     } catch (error) {
       setConversation((current) => [...current, {
@@ -80,13 +81,13 @@ const CareConcierge = ({ className = "" }) => {
   };
 
   return (
-    <section className={`concierge-panel ${className}`} aria-label="Rajshahi Care Concierge">
+    <section className={`concierge-panel ${className}`} aria-label="Bangladesh Care Concierge">
       <div className="flex items-start justify-between gap-3 border-b border-primary-100 pb-4">
         <div className="flex gap-3">
           <div className="w-10 h-10 rounded-2xl bg-primary-900 text-accent-300 flex items-center justify-center shadow-lg shadow-primary-900/20"><FiShield /></div>
           <div><p className="text-[10px] uppercase tracking-[.19em] font-extrabold text-accent-700">Aurevia intelligence</p><h2 className="font-display text-xl text-primary-900 leading-tight">Care Concierge</h2></div>
         </div>
-        <span className="rounded-full bg-primary-50 px-2.5 py-1 text-[10px] font-bold text-primary-700">Rajshahi</span>
+        <span className="rounded-full bg-primary-50 px-2.5 py-1 text-[10px] font-bold text-primary-700">Bangladesh network</span>
       </div>
 
       <div className="concierge-scroll py-4 space-y-3" aria-live="polite">
@@ -95,7 +96,9 @@ const CareConcierge = ({ className = "" }) => {
             <div className={`max-w-[94%] rounded-2xl px-3.5 py-3 text-sm leading-5 ${item.role === "user" ? "bg-primary-900 text-white rounded-br-md" : item.route?.urgency === "emergency" ? "bg-red-50 text-red-950 border border-red-100 rounded-bl-md" : "bg-primary-50 text-slate-700 rounded-bl-md"}`}>
               {item.route?.urgency === "emergency" && <p className="mb-1 flex items-center gap-1.5 text-xs font-extrabold text-red-700"><FiAlertTriangle /> জরুরি বার্তা</p>}
               <p>{item.text}</p>
+              {item.scope && <p className="mt-2 text-[11px] font-bold text-primary-700">Search scope: {item.scope}</p>}
               {item.route?.nextStep && <p className="mt-2 text-xs font-semibold text-primary-800">পরের ধাপ: {item.route.nextStep}</p>}
+              {item.coverage === "no_published_records_for_location" && <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-2 text-[11px] leading-4 text-amber-900">এই location-এর জন্য এখনো verified public record প্রকাশিত হয়নি। অন্য location-এর contact দেখানো হয়নি।</p>}
               <EntryCards entries={item.entries} />
             </div>
           </div>

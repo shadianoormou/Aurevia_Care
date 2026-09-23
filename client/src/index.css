@@ -23,6 +23,9 @@ body { @apply bg-[#f2f5f3] text-slate-800 font-sans antialiased; }
 .care-step span { @apply font-display text-2xl text-accent-600; }
 .care-step h3 { @apply text-sm font-extrabold text-primary-900 mt-8; }
 .care-step p { @apply text-xs leading-5 text-slate-500 mt-2; }
+.home-collection-card { @apply relative min-h-52 overflow-hidden rounded-3xl bg-primary-900 shadow-lg shadow-primary-900/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl; }
+.home-collection-card img { @apply absolute inset-0 h-full w-full object-cover opacity-70 transition duration-700 group-hover:scale-110; }
+.home-collection-shade { @apply absolute inset-0 bg-gradient-to-t from-primary-900 via-primary-900/55 to-primary-900/10; }
 .directory-card { @apply rounded-3xl bg-white border border-primary-100 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 transition; }
 .directory-kind { @apply rounded-full bg-primary-50 px-2.5 py-1 text-[9px] uppercase tracking-[.12em] font-extrabold text-primary-700; }
 .catalog-orb { position: absolute; width: 38rem; height: 38rem; right: -10rem; top: -22rem; border-radius: 999px; background: radial-gradient(circle, rgba(223,189,106,.23), transparent 68%); }

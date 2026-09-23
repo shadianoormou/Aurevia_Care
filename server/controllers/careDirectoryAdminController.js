@@ -28,6 +28,8 @@ const normaliseEntry = (body) => {
     conditions: conditions.map((item) => text(item, 80)).filter(Boolean).slice(0, 30),
     phone: text(body.phone, 200) || null, email: text(body.email, 254) || null,
     availability: text(body.availability, 300) || null, verificationNote: text(body.verificationNote, 500) || null,
+    division: text(body.division, 80) || null, district: text(body.district, 80) || null, upazila: text(body.upazila, 120) || null,
+    country: text(body.country, 80) || "Bangladesh",
     isPublished: body.isPublished !== false,
   };
 };
@@ -45,6 +47,10 @@ const bindEntry = (request, entry) => {
   request.input("sourceLabel", sql.NVarChar(180), entry.sourceLabel);
   request.input("sourceUrl", sql.NVarChar(2048), entry.sourceUrl);
   request.input("lastVerifiedAt", sql.Date, entry.lastVerifiedAt);
+  request.input("division", sql.NVarChar(80), entry.division);
+  request.input("district", sql.NVarChar(80), entry.district);
+  request.input("upazila", sql.NVarChar(120), entry.upazila);
+  request.input("country", sql.NVarChar(80), entry.country);
   request.input("isPublished", sql.Bit, entry.isPublished);
 };
 
@@ -61,9 +67,9 @@ export const createDirectoryEntry = async (req, res, next) => {
     const request = await createRequest();
     bindEntry(request, entry);
     const { recordset } = await request.query(`INSERT INTO dbo.CareDirectoryEntries
-      (Kind, Name, Specialty, ConditionsJson, Address, Phone, Email, Availability, VerificationNote, SourceLabel, SourceUrl, LastVerifiedAt, IsPublished)
-      OUTPUT inserted.Id, inserted.Kind, inserted.Name, inserted.Specialty, inserted.ConditionsJson, inserted.Address, inserted.Phone, inserted.Email, inserted.Availability, inserted.VerificationNote, inserted.SourceLabel, inserted.SourceUrl, inserted.LastVerifiedAt, inserted.IsPublished, inserted.CreatedAt, inserted.UpdatedAt
-      VALUES (@kind, @name, @specialty, @conditions, @address, @phone, @email, @availability, @verificationNote, @sourceLabel, @sourceUrl, @lastVerifiedAt, @isPublished)`);
+      (Kind, Name, Specialty, ConditionsJson, Address, Phone, Email, Availability, VerificationNote, SourceLabel, SourceUrl, LastVerifiedAt, Division, District, Upazila, Country, IsPublished)
+      OUTPUT inserted.Id, inserted.Kind, inserted.Name, inserted.Specialty, inserted.ConditionsJson, inserted.Address, inserted.Phone, inserted.Email, inserted.Availability, inserted.VerificationNote, inserted.SourceLabel, inserted.SourceUrl, inserted.LastVerifiedAt, inserted.IsPublished, inserted.Division, inserted.District, inserted.Upazila, inserted.Country, inserted.CreatedAt, inserted.UpdatedAt
+      VALUES (@kind, @name, @specialty, @conditions, @address, @phone, @email, @availability, @verificationNote, @sourceLabel, @sourceUrl, @lastVerifiedAt, @division, @district, @upazila, @country, @isPublished)`);
     res.status(201).json({ success: true, entry: serializeEntry(recordset[0]) });
   } catch (error) { next(error); }
 };
@@ -79,8 +85,9 @@ export const updateDirectoryEntry = async (req, res, next) => {
       Kind = @kind, Name = @name, Specialty = @specialty, ConditionsJson = @conditions, Address = @address,
       Phone = @phone, Email = @email, Availability = @availability, VerificationNote = @verificationNote,
       SourceLabel = @sourceLabel, SourceUrl = @sourceUrl, LastVerifiedAt = @lastVerifiedAt,
+      Division = @division, District = @district, Upazila = @upazila, Country = @country,
       IsPublished = @isPublished, UpdatedAt = SYSUTCDATETIME()
-      OUTPUT inserted.Id, inserted.Kind, inserted.Name, inserted.Specialty, inserted.ConditionsJson, inserted.Address, inserted.Phone, inserted.Email, inserted.Availability, inserted.VerificationNote, inserted.SourceLabel, inserted.SourceUrl, inserted.LastVerifiedAt, inserted.IsPublished, inserted.CreatedAt, inserted.UpdatedAt
+      OUTPUT inserted.Id, inserted.Kind, inserted.Name, inserted.Specialty, inserted.ConditionsJson, inserted.Address, inserted.Phone, inserted.Email, inserted.Availability, inserted.VerificationNote, inserted.SourceLabel, inserted.SourceUrl, inserted.LastVerifiedAt, inserted.IsPublished, inserted.Division, inserted.District, inserted.Upazila, inserted.Country, inserted.CreatedAt, inserted.UpdatedAt
       WHERE Id = @id`);
     if (!recordset[0]) throw httpError("Directory entry not found", 404);
     res.status(200).json({ success: true, entry: serializeEntry(recordset[0]) });

@@ -7,7 +7,7 @@
 [![SQL Server](https://img.shields.io/badge/Data-Microsoft%20SQL%20Server-CC2927?logo=microsoftsqlserver&logoColor=white)](server/migrations)
 [![License](https://img.shields.io/badge/license-Private%20client%20project-5B2C6F)](#licensing)
 
-Aurevia Care pairs a premium pharmacy storefront with prescription-aware fulfilment and a source-attributed Rajshahi care navigator. It is built for a pharmacist-led operating model: the application can help people discover products and care services, but it never diagnoses, prescribes, or substitutes professional medical judgement.
+Aurevia Care pairs a premium pharmacy storefront with prescription-aware fulfilment and a source-attributed Bangladesh care navigator. It is built for a pharmacist-led operating model: the application can help people discover products and care services, but it never diagnoses, prescribes, or substitutes professional medical judgement.
 
 ## Project links
 
@@ -30,10 +30,10 @@ Healthcare shopping needs more than a pretty catalogue. Aurevia Care gives custo
 - **Five care collections** — Medicines & Wellness, Skin Care, Hair & Scalp, Oral & Dental, and Creams & First Aid, with 21 SQL-backed subcategories.
 - **Prescription centre** — authenticated image/PDF upload or manual entry, protected file access, pharmacist review states, approval expiry, and order gating.
 - **Voice-assisted discovery** — browser-supported Web Speech input for product and symptom search, with keyboard-friendly manual search as the dependable fallback.
-- **Rajshahi Care Concierge** — Bangla/English text and voice questions with safety-first care routing and a curated directory for hospitals, doctors, diagnostics, blood support, and emergency contacts.
+- **Bangladesh Care Concierge** — Bangla/English text and voice questions with safety-first care routing across all 8 divisions and 64 districts, plus a curated directory for hospitals, doctors, diagnostics, blood support, and emergency contacts.
 - **Trustworthy directory workflow** — public entries must carry a source URL and verification date; admins can publish, update, or archive them without silently deleting history.
 - **Fulfilment controls** — role-based workspaces, transaction-safe stock reservation, cancellation rollback, immutable order snapshots, and inventory administration.
-- **SQL-first foundation** — GUIDs, foreign keys, check constraints, indexes, parameterised queries, migration scripts, and audit timestamps in Microsoft SQL Server / Azure SQL.
+- **SQL-first foundation** — GUIDs, foreign keys, check constraints, indexes, parameterised queries, migration scripts, location taxonomy, and audit timestamps in Microsoft SQL Server / Azure SQL.
 
 ## Product boundaries
 
@@ -78,7 +78,7 @@ flowchart TB
     subgraph Data[Microsoft SQL Server / Azure SQL]
         Core[(Users / Products / Categories / Orders / Reviews)]
         Protected[(Prescriptions · Audit history)]
-        Directory[(Rajshahi care directory / Sources / Verification dates)]
+        Directory[(Bangladesh care directory / Location / Sources / Verification dates)]
     end
 
     subgraph Optional[Optional managed services]
@@ -148,13 +148,13 @@ npm install
 npm run db:migrate
 ```
 
-For a local starter catalogue and initial Rajshahi care-directory entries, add a real `ADMIN_EMAIL` and a 12-character-or-longer `ADMIN_PASSWORD` to `server/.env`, then run:
+For a local starter catalogue and the initial seeded care-directory entries, add a real `ADMIN_EMAIL` and a 12-character-or-longer `ADMIN_PASSWORD` to `server/.env`, then run:
 
 ```powershell
 npm run seed
 ```
 
-The seed command is deliberately blocked in production unless `ALLOW_PRODUCTION_SEED=true` has been explicitly configured.
+The seed command is deliberately blocked in production unless `ALLOW_PRODUCTION_SEED=true` has been explicitly configured. The starter directory currently contains only source-attributed seed records; the Bangladesh location taxonomy is ready for verified provider imports without inventing coverage.
 
 ### 2. Configure and start the web app
 

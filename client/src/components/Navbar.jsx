@@ -56,7 +56,7 @@ const Navbar = () => {
       {menuOpen && <div className="md:hidden border-t border-slate-100 px-4 py-4 space-y-3 bg-white">
         <form onSubmit={handleSearch} className="relative"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search medicines…" className="input-field pr-12 text-sm" /><VoiceSearchButton onResult={search} className="absolute right-2 top-1/2 -translate-y-1/2 p-2" /></form>
         <Link to="/products" onClick={() => setMenuOpen(false)} className="block text-sm font-semibold text-slate-700">Shop</Link>
-        <Link to="/care" onClick={() => setMenuOpen(false)} className="block text-sm font-semibold text-slate-700">Rajshahi care guide</Link>
+        <Link to="/care" onClick={() => setMenuOpen(false)} className="block text-sm font-semibold text-slate-700">Bangladesh care guide</Link>
         <Link to="/cart" onClick={() => setMenuOpen(false)} className="block text-sm font-semibold text-slate-700">Cart ({cartCount})</Link>
         {user && <Link to="/prescriptions" onClick={() => setMenuOpen(false)} className="block text-sm font-semibold text-slate-700">Prescriptions</Link>}
         {(isAdmin || isPharmacist) && <Link to="/admin/dashboard" onClick={() => setMenuOpen(false)} className="block text-sm font-semibold text-slate-700">Workspace</Link>}

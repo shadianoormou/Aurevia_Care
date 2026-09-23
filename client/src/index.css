@@ -29,7 +29,14 @@ body { @apply bg-[#f2f5f3] text-slate-800 font-sans antialiased; }
 .directory-card { @apply rounded-3xl bg-white border border-primary-100 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 transition; }
 .directory-kind { @apply rounded-full bg-primary-50 px-2.5 py-1 text-[9px] uppercase tracking-[.12em] font-extrabold text-primary-700; }
 .catalog-orb { position: absolute; width: 38rem; height: 38rem; right: -10rem; top: -22rem; border-radius: 999px; background: radial-gradient(circle, rgba(223,189,106,.23), transparent 68%); }
-.catalog-rail { @apply grid grid-flow-col auto-cols-[74%] sm:auto-cols-[35%] lg:auto-cols-[19%] gap-3 overflow-x-auto pb-3 snap-x; scrollbar-width: thin; }
+.catalog-rail { display: grid; grid-auto-flow: column; grid-auto-columns: 84%; gap: .75rem; overflow-x: auto; padding-bottom: .35rem; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.catalog-rail::-webkit-scrollbar { display: none; }
+@media (min-width: 640px) {
+  .catalog-rail { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: row; grid-auto-columns: auto; overflow-x: visible; padding-bottom: 0; }
+}
+@media (min-width: 1024px) {
+  .catalog-rail { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
 .catalog-category { @apply relative min-h-48 rounded-3xl overflow-hidden p-4 text-left text-white shadow-xl shadow-primary-900/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl snap-start; }
 .catalog-category-overlay { @apply absolute inset-0 bg-gradient-to-t from-primary-900 via-primary-900/55 to-primary-900/15; }
 .catalog-category-active { @apply ring-2 ring-accent-300 ring-offset-2 ring-offset-primary-900; }

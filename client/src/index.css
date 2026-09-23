@@ -46,6 +46,31 @@ body { @apply bg-[#f2f5f3] text-slate-800 font-sans antialiased; }
 .catalog-safety-note { @apply flex gap-3 rounded-2xl bg-primary-50 border border-primary-100 p-4 text-xs leading-5 text-primary-800; }
 .catalog-safety-note svg { @apply mt-0.5 shrink-0 text-accent-700; }
 
+.site-header { @apply sticky top-0 z-40 border-b border-primary-100/80 bg-[#fbfdfc]/95 backdrop-blur-xl; box-shadow: 0 8px 30px rgba(10,40,40,.045); }
+.site-header-inner { @apply mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6; }
+.brand-lockup { @apply flex shrink-0 items-center gap-2.5 rounded-2xl pr-2 transition-opacity hover:opacity-85; }
+.brand-mark { @apply h-10 w-10 drop-shadow-[0_5px_8px_rgba(10,40,40,.18)]; }
+.brand-copy { @apply flex flex-col leading-none; }
+.brand-name { @apply font-display text-[1.18rem] font-bold tracking-[-.035em] text-primary-900; }
+.brand-name em { @apply not-italic text-accent-600; }
+.brand-subtitle { @apply mt-1 hidden text-[8px] font-extrabold uppercase tracking-[.15em] text-primary-500 sm:block; }
+.nav-search { @apply rounded-full border border-primary-100 bg-white/80 shadow-sm transition focus-within:border-primary-300 focus-within:shadow-md; }
+.nav-link { @apply inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-extrabold tracking-[-.01em] text-slate-600 transition hover:bg-primary-50 hover:text-primary-900; }
+.nav-link svg { @apply text-primary-500; }
+.nav-link-active { @apply bg-primary-50 text-primary-900 shadow-sm; }
+.nav-icon-button { @apply inline-flex h-10 w-10 items-center justify-center rounded-xl text-primary-800 transition hover:bg-primary-50 hover:text-primary-900; }
+.nav-icon-button-active { @apply bg-primary-50; }
+.nav-signin { @apply inline-flex items-center gap-2 rounded-xl bg-primary-900 px-4 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-primary-900/15 transition hover:-translate-y-0.5 hover:bg-primary-800; }
+.mobile-menu-toggle { @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-primary-100 bg-white text-xl text-primary-900 shadow-sm transition hover:bg-primary-50; }
+.mobile-menu { @apply border-t border-primary-100/80 bg-[#f8fbfa] shadow-xl shadow-primary-900/10; }
+.mobile-menu-inner { @apply mx-auto max-w-7xl px-4 py-4 sm:px-6; }
+.mobile-menu-label { @apply mb-1 text-[9px] font-extrabold uppercase tracking-[.18em] text-accent-700; }
+.mobile-nav-link { @apply flex items-center justify-between border-b border-primary-100/80 py-3 text-sm font-extrabold text-primary-800 transition hover:text-accent-700; }
+.mobile-nav-link span:last-child { @apply text-[10px] font-bold tracking-[.16em] text-primary-300; }
+.mobile-nav-link-active { @apply text-accent-700; }
+.mobile-nav-link small { @apply font-normal text-slate-400; }
+.mobile-logout { @apply mt-4 text-sm font-extrabold text-red-600; }
+
 @media (prefers-reduced-motion: no-preference) {
   .catalog-orb { animation: catalog-float 12s ease-in-out infinite alternate; }
 }

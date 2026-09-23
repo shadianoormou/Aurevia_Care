@@ -66,19 +66,19 @@ const triagePlan = (rawMessage) => {
   }
 
   const routes = [
-    [["toothache", "tooth pain", "dental pain", "gum pain", "tooth ache", "dath betha", "daat betha", "dant betha", "dat betha", "dath", "দাঁত ব্যথা", "দাঁতের ব্যথা", "দাত ব্যথা", "দাঁতের যন্ত্রণা", "মাড়ি ব্যথা", "মাড়ি ব্যথা", "দাঁত", "দাত", "দাঁতের"], "Dental", "দাঁত ও মুখের care"],
-    [["pregnan", "period", "menstrual", "gynae", "gyne", "গর্ভ", "প্রেগ", "মাসিক", "নারী"], "Gynecology & obstetrics", "নারী ও প্রসূতি care"],
-    [["child", "baby", "infant", "pediatric", "paediatric", "শিশু", "বাচ্চা"], "Pediatrics", "শিশু care"],
-    [["skin", "rash", "acne", "allergy", "চামড়া", "ত্বক", "ফুসকুড়ি", "এলার্জ"], "Dermatology", "ত্বক ও allergy care"],
-    [["eye", "vision", "চোখ", "দৃষ্টি"], "Ophthalmology", "চোখের care"],
-    [["tooth", "dental", "gum", "দাঁত", "মাড়ি"], "Dental", "dental care"],
-    [["bone", "joint", "fracture", "back pain", "হাড়", "জয়েন্ট", "ভাঙা", "কোমর"], "Orthopedics", "হাড় ও joint care"],
-    [["heart", "palpitation", "cardiac", "heart pain", "buk dhorfor", "buk dorfor", "হার্ট", "হৃদ", "বুক ধড়ফড়", "বুক ধড়ফড়"], "Cardiology", "heart care"],
-    [["headache", "migraine", "neurology", "head", "মাথাব্যথা", "মাইগ্রেন", "নিউরো"], "Neurology", "neurology care"],
-    [["cough", "asthma", "breathing", "chest", "কাশি", "হাঁপানি", "শ্বাস"], "Chest & respiratory medicine", "respiratory care"],
-    [["diabetes", "thyroid", "sugar", "ডায়াবেটিস", "থাইরয়েড", "সুগার"], "Medicine / endocrinology", "diabetes ও hormone care"],
-    [["mental", "anxiety", "depression", "panic", "মানসিক", "উদ্বেগ", "ডিপ্রেশন"], "Psychiatry", "mental-health care"],
-    [["urine", "kidney", "urology", "প্রস্রাব", "কিডনি", "মূত্র"], "Urology / nephrology", "kidney ও urinary care"],
+    [["toothache", "tooth pain", "dental pain", "gum pain", "tooth ache", "dath betha", "daat betha", "dant betha", "dat betha", "dath", "দাঁত ব্যথা", "দাঁতের ব্যথা", "দাত ব্যথা", "দাঁতের যন্ত্রণা", "মাড়ি ব্যথা", "মাড়ি ব্যথা", "দাঁত", "দাত", "দাঁতের"], "Dental", "দাঁত ও মুখের care", "tooth"],
+    [["pregnan", "period", "menstrual", "gynae", "gyne", "গর্ভ", "প্রেগ", "মাসিক", "নারী"], "Gynecology & obstetrics", "নারী ও প্রসূতি care", "gynecology"],
+    [["child", "baby", "infant", "pediatric", "paediatric", "শিশু", "বাচ্চা"], "Pediatrics", "শিশু care", "child"],
+    [["skin", "rash", "acne", "allergy", "চামড়া", "ত্বক", "ফুসকুড়ি", "এলার্জ"], "Dermatology", "ত্বক ও allergy care", "skin"],
+    [["eye", "vision", "চোখ", "দৃষ্টি"], "Ophthalmology", "চোখের care", "eye"],
+    [["tooth", "dental", "gum", "দাঁত", "মাড়ি"], "Dental", "dental care", "tooth"],
+    [["bone", "joint", "fracture", "back pain", "হাড়", "জয়েন্ট", "ভাঙা", "কোমর"], "Orthopedics", "হাড় ও joint care", "orthopedic"],
+    [["heart", "palpitation", "cardiac", "heart pain", "heart attack", "angina", "buk dhorfor", "buk dorfor", "হার্ট", "হৃদ", "বুক ধড়ফড়", "বুক ধড়ফড়"], "Cardiology", "heart care", "heart"],
+    [["headache", "migraine", "neurology", "head", "matha betha", "মাথাব্যথা", "মাথা ব্যথা", "মাইগ্রেন", "নিউরো"], "Neurology", "neurology care", "neurology"],
+    [["cough", "kashi", "asthma", "breathing", "chest", "cold", "sordi", "shordi", "কাশি", "হাঁপানি", "শ্বাস"], "Chest & respiratory medicine", "respiratory care", "respiratory"],
+    [["diabetes", "thyroid", "sugar", "ডায়াবেটিস", "থাইরয়েড", "সুগার"], "Medicine / endocrinology", "diabetes ও hormone care", "diabetes"],
+    [["mental", "anxiety", "depression", "panic", "মানসিক", "উদ্বেগ", "ডিপ্রেশন"], "Psychiatry", "mental-health care", "mental"],
+    [["urine", "kidney", "urology", "প্রস্রাব", "কিডনি", "মূত্র"], "Urology / nephrology", "kidney ও urinary care", "kidney"],
   ];
   const route = routes.find(([terms]) => includesAny(message, terms));
   const specialty = route?.[1] || "General medicine";
@@ -89,6 +89,7 @@ const triagePlan = (rawMessage) => {
       ? `আপনার বলা বিষয়টির জন্য ${specialty} department-এর clinician-এর সাথে কথা বলা উপযোগী হতে পারে।`
       : "লক্ষণটি যদি নতুন, স্থায়ী বা বাড়তে থাকে, General Medicine/OPD দিয়ে শুরু করুন; তারা প্রয়োজন হলে specialist route দেবেন।",
     nextStep: "নিচের verified directory থেকে appointment line-এ কল করে সময় নিশ্চিত করুন।",
+    directoryQuery: route?.[3] || null,
     location,
   };
 };
@@ -154,8 +155,10 @@ export const askConcierge = async (req, res, next) => {
     const plan = triagePlan(message);
     const location = plan.location || {};
     const locationFilter = location.division || location.district ? { division: location.division, district: location.district, upazila: location.upazila } : {};
-    let entries = await findEntries({ kind: plan.kind, query: plan.kind === "blood_bank" ? "" : plan.specialty, ...locationFilter, limit: 6 });
-    if (!entries.length) entries = await findEntries({ kind: plan.kind, query: "", ...locationFilter, limit: 6 });
+    const directoryQuery = plan.kind === "blood_bank" ? "" : plan.directoryQuery || plan.specialty;
+    let entries = await findEntries({ kind: plan.kind, query: directoryQuery, ...locationFilter, limit: 10 });
+    // Never fill a specialist request with an unrelated doctor. An empty result is safer
+    // than showing a cardiologist for cough, or an orthopedist for tooth pain.
     if (!entries.length && plan.kind === "doctor") {
       entries = await findEntries({ kind: "facility", query: "", ...locationFilter, limit: 4 });
     }

@@ -77,6 +77,36 @@ body { @apply bg-[#f2f5f3] text-slate-800 font-sans antialiased; }
 .mobile-nav-link-active { @apply text-accent-700; }
 .mobile-nav-link small { @apply font-normal text-slate-400; }
 .mobile-logout { @apply mt-4 text-sm font-extrabold text-red-600; }
+.auth-page-shell { @apply min-h-[calc(100vh-5rem)] bg-[#f2f6f4] px-4 py-8 sm:px-6 sm:py-12; background-image: radial-gradient(circle at 8% 10%, rgba(223,189,106,.16), transparent 25%), radial-gradient(circle at 95% 20%, rgba(77,171,150,.12), transparent 25%); }
+.auth-shell-grid { @apply mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] bg-primary-900 shadow-2xl shadow-primary-900/20 lg:grid-cols-[.78fr_1.22fr]; }
+.auth-story { @apply relative overflow-hidden p-7 sm:p-10 lg:p-12; background-image: linear-gradient(145deg, rgba(10,40,40,.96), rgba(18,63,59,.92)); }
+.auth-story::after { content: ""; @apply pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border border-accent-300/20; box-shadow: 0 0 0 34px rgba(223,189,106,.04), 0 0 0 70px rgba(223,189,106,.03); }
+.auth-story-mark { @apply relative z-10 h-12 w-12 rounded-2xl bg-white/10 p-1.5 shadow-lg shadow-black/20; }
+.auth-story-mark img { @apply h-full w-full; }
+.auth-story-list { @apply relative z-10 mt-10 space-y-3 text-xs font-bold text-primary-100; }
+.auth-story-list p { @apply flex items-center gap-2; }
+.auth-story-list svg { @apply rounded-full bg-accent-300/20 p-1 text-accent-200; }
+.auth-card { @apply bg-[#fbfdfc] p-6 sm:p-10 lg:p-12; }
+.auth-method-switch { @apply mt-7 grid grid-cols-2 gap-1 rounded-2xl border border-primary-100 bg-primary-50 p-1; }
+.auth-method-switch button { @apply inline-flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-extrabold text-primary-600 transition hover:text-primary-900; }
+.auth-method-switch button svg { @apply text-sm; }
+.auth-method-active { @apply bg-white text-primary-900 shadow-sm; }
+.auth-google-button { @apply mt-5 flex min-h-10 w-full justify-center; }
+.auth-google-fallback { @apply mt-5 flex w-full items-center justify-center gap-3 rounded-xl border border-primary-100 bg-white py-3 text-xs font-extrabold text-primary-800 shadow-sm transition hover:border-primary-300 hover:bg-primary-50; }
+.auth-google-mark { @apply font-display text-xl font-bold text-[#4285f4]; }
+.auth-divider { @apply my-5 flex items-center gap-3 text-[10px] font-extrabold uppercase tracking-[.13em] text-slate-400; }
+.auth-divider::before, .auth-divider::after { content: ""; @apply h-px flex-1 bg-primary-100; }
+.auth-field { @apply block text-xs font-extrabold text-primary-800; }
+.auth-field > span { @apply flex items-center gap-2; }
+.auth-field > span svg { @apply text-primary-500; }
+.auth-field > span i { @apply ml-auto text-[10px] font-medium not-italic text-slate-400; }
+.auth-field input { @apply mt-2 w-full rounded-xl border border-primary-100 bg-white px-3.5 py-3 text-sm font-medium text-primary-900 outline-none transition placeholder:text-slate-400 focus:border-primary-400 focus:ring-4 focus:ring-primary-100; }
+.auth-field small { @apply mt-1 block font-semibold text-red-600; }
+.auth-field em { @apply mt-1 block text-[10px] font-semibold text-slate-400 not-italic; }
+.auth-field em.auth-strength-ok { @apply text-primary-600; }
+.auth-submit { @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary-900 px-4 py-3 text-sm font-extrabold text-white shadow-xl shadow-primary-900/15 transition hover:-translate-y-0.5 hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60; }
+.auth-legal { @apply mt-4 text-center text-[10px] leading-4 text-slate-400; }
+@media (max-width: 1023px) { .auth-story { @apply hidden; } .auth-shell-grid { @apply max-w-xl; } }
 
 @media (prefers-reduced-motion: no-preference) {
   .catalog-orb { animation: catalog-float 12s ease-in-out infinite alternate; }

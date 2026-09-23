@@ -24,14 +24,20 @@ export const AuthProvider = ({ children }) => {
     loadProfile();
   }, []);
 
-  const login = async (email, password) => {
-    const { data } = await api.post("/auth/login", { email, password });
+  const login = async (identifier, password) => {
+    const { data } = await api.post("/auth/login", { identifier, password });
     setUser(data.user);
     return data.user;
   };
 
   const register = async (formData) => {
     const { data } = await api.post("/auth/register", formData);
+    setUser(data.user);
+    return data.user;
+  };
+
+  const googleLogin = async (credential) => {
+    const { data } = await api.post("/auth/google", { credential });
     setUser(data.user);
     return data.user;
   };
@@ -49,7 +55,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, register, logout, updateUser, isAdmin: user?.role === "admin", isPharmacist: user?.role === "pharmacist" }}
+      value={{ user, loading, login, register, googleLogin, logout, updateUser, isAdmin: user?.role === "admin", isPharmacist: user?.role === "pharmacist" }}
     >
       {children}
     </AuthContext.Provider>

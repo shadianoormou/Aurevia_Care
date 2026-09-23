@@ -29,6 +29,7 @@ Healthcare shopping needs more than a pretty catalogue. Aurevia Care gives custo
 - **Luxury, responsive storefront** — editorial hero layouts, animated category browsing, product imagery, shareable filters, and polished mobile-first interactions.
 - **Five care collections** — Medicines & Wellness, Skin Care, Hair & Scalp, Oral & Dental, and Creams & First Aid, with 21 SQL-backed subcategories.
 - **Prescription centre** — authenticated image/PDF upload or manual entry, protected file access, pharmacist review states, approval expiry, and order gating.
+- **Professional authentication** — email/password or Bangladesh phone/password registration, email-or-phone sign-in, Google Identity Services support, secure HTTP-only sessions, identity uniqueness indexes, and rate-limited auth endpoints.
 - **Voice-assisted discovery** — browser-supported Web Speech input for product and symptom search, with keyboard-friendly manual search as the dependable fallback.
 - **Bangladesh Care Concierge** — Bangla/English text and voice questions with safety-first care routing across all 8 divisions and 64 districts, plus a curated directory for hospitals, doctors, diagnostics, blood support, and emergency contacts.
 - **Trustworthy directory workflow** — public entries must carry a source URL and verification date; admins can publish, update, or archive them without silently deleting history.
@@ -54,6 +55,7 @@ This repository intentionally keeps health and pharmacy operations within safe b
 | Files | Prescription documents in SQL Server with role and ownership checks; optional Cloudinary product images |
 | Document extraction | Optional Azure AI Document Intelligence `prebuilt-read` model |
 | Care navigator | Safety-first routing rules plus source-attributed local directory data in SQL Server |
+| Authentication | Email/phone password accounts plus optional Google Identity Services verification |
 
 ## Architecture
 
@@ -186,6 +188,20 @@ npm run build
 cd ../server
 npm audit --omit=dev
 ```
+
+### Authentication configuration
+
+Phone registration is available with a password and normalises Bangladesh numbers to `+8801XXXXXXXXX`. Google sign-in is intentionally disabled until the same OAuth Web Client ID is configured in both environments:
+
+```env
+# client/.env
+VITE_GOOGLE_CLIENT_ID=your_web_client_id.apps.googleusercontent.com
+
+# server/.env
+GOOGLE_CLIENT_ID=your_web_client_id.apps.googleusercontent.com
+```
+
+Add `http://localhost:5173` (and the production HTTPS origin) to the Google OAuth authorised JavaScript origins. Never commit OAuth secrets, JWT secrets, SQL credentials, or administrator passwords. The bootstrap administrator requires a unique password of at least 12 characters; weak passwords such as `0000` are rejected by design.
 
 ## Production deployment
 

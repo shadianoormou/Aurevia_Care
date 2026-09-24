@@ -1,10 +1,7 @@
 {
   "version": 2,
   "installCommand": "npm install && npm install --prefix client",
-  "buildCommand": "npm --prefix client run build",
-  "functions": {
-    "api/index.mjs": { "includeFiles": "server/migrations-postgres/001_schema.sql" }
-  },
+  "buildCommand": "node scripts/vercel-build.mjs",
   "builds": [
     { "src": "api/index.mjs", "use": "@vercel/node" },
     { "src": "client/package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }

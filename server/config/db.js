@@ -43,8 +43,13 @@ export const connectDB = async () => {
       if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL must be set when DB_DRIVER=postgres");
       poolPromise = Promise.resolve(new PostgresPool(process.env.DATABASE_URL))
         .then(async (pool) => {
-          const schema = await readFile(new URL("../migrations-postgres/001_schema.sql", import.meta.url), "utf8");
-          await pool.query(schema);
+          try {
+            const schema = await readFile(new URL("../migrations-postgres/001_schema.sql", import.meta.url), "utf8");
+            await pool.query(schema);
+          } catch (error) {
+            if (error.code !== "ENOENT") throw error;
+            console.warn("PostgreSQL migration file is not bundled; using the schema created during deployment.");
+          }
           console.log("PostgreSQL connected");
           return pool;
         })

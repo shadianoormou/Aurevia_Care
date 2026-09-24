@@ -6,7 +6,7 @@ import api from "../../api/axios.js";
 import Loader from "../../components/Loader.jsx";
 import ConfirmModal from "../../components/ConfirmModal.jsx";
 
-const emptyForm = { name: "", description: "", icon: "" };
+const emptyForm = { name: "", description: "", icon: "", sortOrder: 999, isFeatured: false };
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -45,6 +45,8 @@ const AdminCategories = () => {
       name: category.name,
       description: category.description,
       icon: category.icon,
+      sortOrder: category.sortOrder,
+      isFeatured: category.isFeatured,
     });
     setShowForm(true);
   };
@@ -101,13 +103,14 @@ const AdminCategories = () => {
               <th className="py-3 px-4">Icon</th>
               <th className="py-3 px-4">Name</th>
               <th className="py-3 px-4">Description</th>
+              <th className="py-3 px-4">Visibility</th>
               <th className="py-3 px-4">Actions</th>
             </tr>
           </thead>
           <tbody>
             {categories.length === 0 ? (
               <tr>
-                <td colSpan={4} className="py-6 px-4 text-center text-gray-500">
+                <td colSpan={5} className="py-6 px-4 text-center text-gray-500">
                   No categories yet. Click "Add Category" to create one.
                 </td>
               </tr>
@@ -117,6 +120,7 @@ const AdminCategories = () => {
                   <td className="py-3 px-4 text-xl">{c.icon || "📦"}</td>
                   <td className="py-3 px-4 font-medium text-gray-800">{c.name}</td>
                   <td className="py-3 px-4 text-gray-500 max-w-xs truncate">{c.description}</td>
+                  <td className="py-3 px-4"><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${c.isFeatured ? "bg-accent-100 text-accent-700" : "bg-slate-100 text-slate-500"}`}>{c.isFeatured ? `Featured · ${c.sortOrder}` : "Standard"}</span></td>
                   <td className="py-3 px-4">
                     <div className="flex gap-3">
                       <button onClick={() => openEdit(c)} className="text-accent-600 hover:text-accent-700">
@@ -156,6 +160,11 @@ const AdminCategories = () => {
               <div>
                 <label className="text-sm text-gray-600">Icon (emoji, optional)</label>
                 <input {...register("icon")} className="input-field mt-1" placeholder="💊" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="text-sm text-gray-600">Sort order</label><input type="number" min="0" {...register("sortOrder")} className="input-field mt-1" /></div>
+                <label className="mt-7 inline-flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" {...register("isFeatured")} /> Feature in shop</label>
               </div>
 
               <div className="flex justify-end gap-3 pt-2">

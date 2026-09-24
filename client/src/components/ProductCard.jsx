@@ -14,6 +14,7 @@ const ProductCard = ({ product }) => {
         <img
           src={product.image || "https://placehold.co/400x300?text=Aurevia+Care"}
           alt={product.name}
+          onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "https://placehold.co/400x300?text=Aurevia+Care"; }}
           className="w-full h-48 sm:h-52 object-cover group-hover:scale-[1.07] transition-transform duration-700"
         />
         {outOfStock && (

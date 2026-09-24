@@ -16,14 +16,24 @@ const Login = () => {
 
   const onGoogleCredential = useCallback(async (credential) => {
     setGoogleBusy(true);
-    try { await googleLogin(credential); toast.success("Welcome back to Aurevia."); navigate(searchParams.get("redirect") || "/"); }
+    try {
+      const signedInUser = await googleLogin(credential);
+      toast.success("Welcome back to Aurevia.");
+      const redirect = searchParams.get("redirect");
+      navigate(redirect || (["admin", "pharmacist"].includes(signedInUser?.role) ? "/admin/dashboard" : "/"));
+    }
     catch (error) { toast.error(error.response?.data?.message || "Google sign-in could not be completed"); }
     finally { setGoogleBusy(false); }
   }, [googleLogin, navigate, searchParams]);
 
   const onSubmit = async (formData) => {
     setSubmitting(true);
-    try { await login(formData.identifier.trim(), formData.password); toast.success("Welcome back."); navigate(searchParams.get("redirect") || "/"); }
+    try {
+      const signedInUser = await login(formData.identifier.trim(), formData.password);
+      toast.success("Welcome back.");
+      const redirect = searchParams.get("redirect");
+      navigate(redirect || (["admin", "pharmacist"].includes(signedInUser?.role) ? "/admin/dashboard" : "/"));
+    }
     catch (error) { toast.error(error.response?.data?.message || "Sign-in failed"); }
     finally { setSubmitting(false); }
   };

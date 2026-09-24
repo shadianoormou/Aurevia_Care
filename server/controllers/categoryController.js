@@ -8,9 +8,13 @@ const outputColumns = categoryColumns.replaceAll(", ", ", inserted.");
 const categoryInput = (request, body) => {
   const name = cleanText(body.name, 120);
   if (!name) throw httpError("Category name is required");
+  const sortOrder = body.sortOrder === undefined || body.sortOrder === "" ? 999 : Number(body.sortOrder);
+  if (!Number.isInteger(sortOrder) || sortOrder < 0) throw httpError("Sort order must be a non-negative whole number");
   request.input("name", sql.NVarChar(120), name);
   request.input("description", sql.NVarChar(1000), cleanText(body.description, 1000) || null);
   request.input("icon", sql.NVarChar(20), cleanText(body.icon, 20) || null);
+  request.input("sortOrder", sql.Int, sortOrder);
+  request.input("isFeatured", sql.Bit, body.isFeatured === true || body.isFeatured === "true");
 };
 
 export const getCategories = async (req, res, next) => {
@@ -38,8 +42,8 @@ export const createCategory = async (req, res, next) => {
   try {
     const request = await createRequest();
     categoryInput(request, req.body);
-    const { recordset } = await request.query(`INSERT INTO dbo.Categories (Name, Description, Icon)
-      OUTPUT inserted.${outputColumns} VALUES (@name, @description, @icon)`);
+    const { recordset } = await request.query(`INSERT INTO dbo.Categories (Name, Description, Icon, SortOrder, IsFeatured)
+      OUTPUT inserted.${outputColumns} VALUES (@name, @description, @icon, @sortOrder, @isFeatured)`);
     res.status(201).json({ success: true, category: serializeCategory(recordset[0]) });
   } catch (error) { next(error); }
 };
@@ -51,7 +55,7 @@ export const updateCategory = async (req, res, next) => {
     categoryInput(request, req.body);
     request.input("id", sql.UniqueIdentifier, req.params.id);
     const { recordset } = await request.query(`UPDATE dbo.Categories SET Name = @name,
-      Description = @description, Icon = @icon, UpdatedAt = SYSUTCDATETIME()
+      Description = @description, Icon = @icon, SortOrder = @sortOrder, IsFeatured = @isFeatured, UpdatedAt = SYSUTCDATETIME()
       OUTPUT inserted.${outputColumns} WHERE Id = @id`);
     if (!recordset[0]) throw httpError("Category not found", 404);
     res.status(200).json({ success: true, category: serializeCategory(recordset[0]) });

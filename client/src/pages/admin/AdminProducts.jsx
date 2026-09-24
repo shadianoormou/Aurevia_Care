@@ -23,6 +23,7 @@ const AdminProducts = () => {
   // Selected image file (for real upload) + a local preview URL for it
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [removeImage, setRemoveImage] = useState(false);
 
   const { register, handleSubmit, reset, watch, formState: { isSubmitting } } = useForm({ defaultValues: emptyForm });
   const imageUrlValue = watch("image");
@@ -50,6 +51,7 @@ const AdminProducts = () => {
   const resetImageState = () => {
     setImageFile(null);
     setImagePreview("");
+    setRemoveImage(false);
   };
 
   const openCreate = () => {
@@ -85,6 +87,7 @@ const AdminProducts = () => {
     if (!file) return;
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
+    setRemoveImage(false);
   };
 
   const onSubmit = async (formData) => {
@@ -101,6 +104,7 @@ const AdminProducts = () => {
       body.append("stock", Number(formData.stock));
       body.append("lowStockThreshold", Number(formData.lowStockThreshold || 10));
       body.append("requiresPrescription", !!formData.requiresPrescription);
+      body.append("removeImage", removeImage);
 
       const symptoms = formData.symptoms
         ? formData.symptoms.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)
@@ -269,7 +273,7 @@ const AdminProducts = () => {
                     <FiUpload /> Choose File
                     <input type="file" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} className="hidden" />
                   </label>
-                  {(imagePreview || imageUrlValue) && (
+                  {(imagePreview || (imageUrlValue && !removeImage)) && (
                     <img
                       src={imagePreview || imageUrlValue}
                       alt="Preview"
@@ -277,6 +281,7 @@ const AdminProducts = () => {
                     />
                   )}
                 </div>
+                {editingId && imageUrlValue && <label className="mt-3 flex items-center gap-2 text-xs font-semibold text-red-600"><input type="checkbox" checked={removeImage} onChange={(event) => setRemoveImage(event.target.checked)} /> Remove current image from media storage</label>}
                 <p className="text-xs text-gray-400 mt-2">
                   Upload a JPG/PNG/WEBP file (max 5MB), or paste an image URL below as a fallback.
                 </p>

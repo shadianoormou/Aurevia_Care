@@ -229,6 +229,10 @@ export const updateProduct = async (req, res, next) => {
       await deleteFromCloudinary(existing.ImagePublicId);
       product.imageUrl = uploaded.secure_url;
       product.imagePublicId = uploaded.public_id;
+    } else if (parseBoolean(req.body.removeImage, false)) {
+      await deleteFromCloudinary(existing.ImagePublicId);
+      product.imageUrl = "";
+      product.imagePublicId = "";
     }
     const request = await createRequest();
     productInput(request, product);

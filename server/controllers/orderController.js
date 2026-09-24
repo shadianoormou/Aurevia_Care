@@ -1,6 +1,7 @@
 import { createRequest, sql, withTransaction } from "../config/db.js";
 import { clampInt, cleanText, httpError, requireUuid } from "../utils/http.js";
 import { serializeOrder } from "../utils/serializers.js";
+import { sendOrderStatusEmail } from "../utils/mailer.js";
 
 const statuses = ["Pending", "Confirmed", "Processing", "Shipped", "Delivered", "Cancelled"];
 const transitions = {
@@ -234,6 +235,15 @@ export const updateOrderStatus = async (req, res, next) => {
         UpdatedAt = SYSUTCDATETIME() WHERE Id = @id;
         INSERT INTO dbo.OrderStatusHistory (OrderId, Status, ChangedBy) VALUES (@id, @status, @changedBy);`);
     });
-    res.status(200).json({ success: true, order: await loadOrder(req.params.id) });
+    const updatedOrder = await loadOrder(req.params.id);
+    let notification = { sent: false, reason: "not_attempted" };
+    try {
+      notification = await sendOrderStatusEmail(updatedOrder, status);
+    } catch (emailError) {
+      // Notification delivery must never roll back a successful order transition.
+      console.error(`Order ${req.params.id} email notification failed: ${emailError.message}`);
+      notification = { sent: false, reason: "delivery_failed" };
+    }
+    res.status(200).json({ success: true, order: updatedOrder, notification });
   } catch (error) { next(error); }
 };

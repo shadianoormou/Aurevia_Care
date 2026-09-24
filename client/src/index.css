@@ -127,7 +127,124 @@ body { @apply bg-[#f2f5f3] text-slate-800 font-sans antialiased; }
   .input-field {
     @apply w-full border border-slate-200 bg-white rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent;
   }
-  .card {
+.card {
     @apply bg-white rounded-2xl shadow-sm border border-slate-100;
   }
 }
+
+/* Admin operations studio */
+.admin-app-shell { @apply min-h-screen bg-[#f2f6f4] text-slate-800; background-image: radial-gradient(circle at 76% 0%, rgba(223,189,106,.12), transparent 24rem); }
+.admin-sidebar { @apply fixed inset-y-0 left-0 z-50 flex w-[17.25rem] -translate-x-full flex-col bg-[#082525] text-white shadow-2xl transition-transform duration-300 lg:translate-x-0; }
+.admin-sidebar-open { @apply translate-x-0; }
+.admin-sidebar-scrim { @apply fixed inset-0 z-40 bg-[#061b1b]/60 backdrop-blur-sm lg:hidden; }
+.admin-sidebar-brand { @apply flex items-center justify-between border-b border-white/10 px-6 py-5; }
+.admin-brand-lockup { @apply flex items-center gap-3 text-white; }
+.admin-brand-lockup > span { @apply flex flex-col font-display text-base tracking-tight; }
+.admin-brand-lockup strong { @apply font-bold; }
+.admin-brand-lockup em { @apply not-italic text-accent-300; }
+.admin-brand-lockup small { @apply mt-1 font-sans text-[8px] font-extrabold uppercase tracking-[.18em] text-primary-300; }
+.admin-brand-mark { @apply h-10 w-10 rounded-xl bg-white/10 p-1 shadow-lg; }
+.admin-mobile-close, .admin-mobile-menu { @apply inline-flex h-10 w-10 items-center justify-center rounded-xl text-xl text-white/70 transition hover:bg-white/10 hover:text-white; }
+.admin-mobile-close { @apply lg:hidden; }
+.admin-sidebar-scroll { @apply flex-1 overflow-y-auto px-4 py-7; }
+.admin-nav-caption { @apply px-3 text-[9px] font-extrabold uppercase tracking-[.2em] text-primary-300; }
+.admin-nav-caption-spaced { @apply mt-9; }
+.admin-sidebar-nav { @apply mt-3 space-y-1; }
+.admin-nav-link { @apply flex items-center gap-3 rounded-xl px-3 py-3 text-[12px] font-bold text-primary-100/70 transition hover:bg-white/10 hover:text-white; }
+.admin-nav-link svg { @apply shrink-0 text-primary-300; }
+.admin-nav-link-active { @apply bg-accent-300 text-primary-900 shadow-lg shadow-black/10; }
+.admin-nav-link-active svg { @apply text-primary-900; }
+.admin-nav-chevron { @apply ml-auto text-sm; }
+.admin-sidebar-note { @apply mt-4 flex gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-primary-100/80; }
+.admin-sidebar-note > svg { @apply mt-0.5 shrink-0 text-accent-300; }
+.admin-sidebar-note strong, .admin-sidebar-note span { @apply block; }
+.admin-sidebar-note strong { @apply text-[11px] text-white; }
+.admin-sidebar-note span { @apply mt-1 text-[10px] leading-4 text-primary-100/60; }
+.admin-sidebar-footer { @apply space-y-1 border-t border-white/10 p-4; }
+.admin-store-link, .admin-logout { @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-bold text-primary-100/70 transition hover:bg-white/10 hover:text-white; }
+.admin-store-link svg, .admin-logout svg { @apply text-primary-300; }
+.admin-main-column { @apply min-h-screen lg:pl-[17.25rem]; }
+.admin-topbar { @apply sticky top-0 z-30 flex min-h-[4.75rem] items-center justify-between gap-4 border-b border-primary-100/80 bg-[#f8fbfa]/90 px-4 backdrop-blur-xl sm:px-7; }
+.admin-topbar-left, .admin-topbar-right { @apply flex items-center gap-3; }
+.admin-mobile-menu { @apply bg-primary-900 text-white lg:hidden; }
+.admin-breadcrumbs { @apply hidden items-center gap-2 text-xs text-slate-400 sm:flex; }
+.admin-breadcrumbs svg { @apply text-slate-300; }
+.admin-breadcrumbs strong { @apply text-primary-900; }
+.admin-live-pill { @apply hidden items-center gap-2 rounded-full bg-primary-50 px-3 py-2 text-[10px] font-extrabold text-primary-700 sm:flex; }
+.admin-live-pill i { @apply h-1.5 w-1.5 rounded-full bg-primary-500 shadow-[0_0_0_3px_rgba(45,140,121,.15)]; }
+.admin-user-chip { @apply flex items-center gap-2.5; }
+.admin-avatar { @apply flex h-9 w-9 items-center justify-center rounded-xl bg-primary-900 text-xs font-extrabold text-accent-300; }
+.admin-user-chip b, .admin-user-chip small { @apply block; }
+.admin-user-chip b { @apply max-w-[9rem] truncate text-xs font-extrabold text-primary-900; }
+.admin-user-chip small { @apply mt-0.5 text-[9px] font-bold uppercase tracking-[.12em] text-slate-400; }
+.admin-settings { @apply hidden h-9 w-9 items-center justify-center rounded-xl text-lg text-slate-400 transition hover:bg-primary-50 hover:text-primary-900 sm:flex; }
+.admin-main-content { @apply min-h-[calc(100vh-4.75rem)] py-1; }
+
+/* Admin dashboard: a quieter, decision-first workspace */
+.admin-dashboard-page { @apply mx-auto max-w-[90rem] px-4 py-7 sm:px-7 sm:py-9; }
+.admin-page-header { @apply flex flex-wrap items-end justify-between gap-5 mb-7; }
+.admin-page-title { @apply font-display text-3xl leading-none tracking-[-.035em] text-primary-900 sm:text-[2.45rem]; }
+.admin-page-subtitle { @apply mt-2 max-w-xl text-sm leading-6 text-slate-500; }
+.admin-page-actions { @apply flex items-center gap-3; }
+.admin-sync-label { @apply hidden text-[10px] font-bold uppercase tracking-[.1em] text-slate-400 sm:inline; }
+.admin-soft-alert { @apply mb-5 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-900; }
+.admin-soft-alert svg { @apply shrink-0 text-amber-600; }
+.admin-metric-grid { @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-5; }
+.admin-metric-card, .admin-health-card { @apply min-h-[10.5rem] rounded-3xl border border-white/70 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg; }
+.admin-metric-primary { @apply bg-white; }
+.admin-metric-gold { @apply bg-[#fffaf0]; }
+.admin-metric-blue { @apply bg-[#f1f7fa]; }
+.admin-metric-violet { @apply bg-[#f6f3fb]; }
+.admin-metric-green { @apply bg-[#eef9f3]; }
+.admin-metric-icon, .admin-health-icon { @apply flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-900 text-lg text-accent-300; }
+.admin-metric-caption { @apply rounded-full bg-white/70 px-2 py-1 text-[9px] font-extrabold uppercase tracking-[.12em] text-slate-400; }
+.admin-metric-label { @apply mt-5 text-[10px] font-extrabold uppercase tracking-[.14em] text-slate-500; }
+.admin-metric-value { @apply mt-1 font-display text-3xl leading-none text-primary-900; }
+.admin-metric-foot { @apply mt-2 text-[11px] text-slate-500; }
+.admin-health-card { @apply bg-primary-900 text-white; }
+.admin-health-card .admin-metric-label { @apply text-primary-200; }
+.admin-health-card .admin-metric-foot { @apply text-primary-300; }
+.admin-health-icon { @apply bg-white/10 text-accent-200; }
+.admin-health-dot { @apply mt-2 h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_0_4px_rgba(110,231,183,.15)]; }
+.admin-health-title { @apply mt-1 text-sm font-extrabold text-white; }
+.admin-workspace-grid { @apply mt-5 grid gap-5 xl:grid-cols-[1.35fr_.65fr]; }
+.admin-lower-grid { @apply mt-5 grid gap-5 xl:grid-cols-[1.15fr_.85fr]; }
+.admin-panel { @apply rounded-3xl border border-primary-100 bg-white p-5 shadow-sm sm:p-6; }
+.admin-chart-panel { @apply min-h-[22rem]; }
+.admin-panel-heading { @apply flex items-start justify-between gap-4; }
+.admin-panel-heading h2 { @apply mt-1 font-display text-2xl tracking-[-.025em] text-primary-900; }
+.admin-panel-chip { @apply inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.1em] text-primary-700; }
+.admin-panel-link { @apply inline-flex items-center gap-1 text-xs font-extrabold text-primary-700 transition hover:text-accent-700; }
+.admin-attention-count { @apply flex h-9 min-w-9 items-center justify-center rounded-full bg-accent-100 px-2 text-sm font-extrabold text-accent-700; }
+.admin-attention-list { @apply mt-5 divide-y divide-primary-50; }
+.admin-attention-row { @apply flex items-center gap-3 py-3 transition hover:translate-x-0.5; }
+.admin-attention-row > span:nth-child(2) { @apply flex min-w-0 flex-1 flex-col; }
+.admin-attention-row b { @apply text-sm text-primary-900; }
+.admin-attention-row small { @apply mt-0.5 text-[11px] text-slate-500; }
+.admin-attention-row > svg { @apply text-slate-300; }
+.admin-attention-icon { @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-xl; }
+.admin-attention-icon-gold { @apply bg-accent-100 text-accent-700; }
+.admin-attention-icon-blue { @apply bg-blue-50 text-blue-700; }
+.admin-attention-icon-red { @apply bg-red-50 text-red-600; }
+.admin-safety-callout { @apply mt-5 flex gap-2 rounded-2xl bg-primary-50 px-3 py-3 text-[11px] leading-5 text-primary-800; }
+.admin-safety-callout svg { @apply mt-0.5 shrink-0 text-primary-600; }
+.admin-empty-state { @apply flex min-h-40 flex-col items-center justify-center gap-2 text-center text-sm text-slate-500; }
+.admin-empty-state svg { @apply text-2xl text-primary-300; }
+.admin-order-list { @apply mt-5 divide-y divide-primary-50; }
+.admin-order-row { @apply flex items-center gap-3 py-3 transition hover:bg-primary-50/60; }
+.admin-order-avatar { @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-900 text-xs font-extrabold text-accent-200; }
+.admin-order-main { @apply flex min-w-0 flex-1 flex-col; }
+.admin-order-main b { @apply truncate text-sm text-primary-900; }
+.admin-order-main small { @apply mt-0.5 text-[10px] text-slate-400; }
+.admin-order-row > strong { @apply hidden text-xs text-primary-900 sm:block; }
+.admin-status-pill { @apply rounded-full px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[.08em]; }
+.admin-status-amber { @apply bg-amber-50 text-amber-800; }
+.admin-status-blue { @apply bg-blue-50 text-blue-700; }
+.admin-status-violet { @apply bg-violet-50 text-violet-700; }
+.admin-status-indigo { @apply bg-indigo-50 text-indigo-700; }
+.admin-status-green { @apply bg-emerald-50 text-emerald-700; }
+.admin-status-red { @apply bg-red-50 text-red-700; }
+.admin-shortcut-grid { @apply mt-5 grid gap-2 sm:grid-cols-2; }
+.admin-shortcut { @apply flex items-center gap-3 rounded-2xl border border-primary-100 bg-primary-50/50 px-3 py-3 text-xs font-extrabold text-primary-800 transition hover:border-primary-300 hover:bg-white hover:shadow-sm; }
+.admin-shortcut > svg:first-child { @apply text-primary-600; }
+.admin-shortcut > svg:last-child { @apply ml-auto text-slate-300; }

@@ -203,6 +203,12 @@ GOOGLE_CLIENT_ID=your_web_client_id.apps.googleusercontent.com
 
 Add both local origins (`http://127.0.0.1:5173` and `http://localhost:5173`) plus the production HTTPS origin to the Google OAuth authorised JavaScript origins. Set the same two environment variables in the hosting platform; the local values are intentionally ignored by Git. Never commit OAuth secrets, JWT secrets, SQL credentials, or administrator passwords. The bootstrap administrator requires a unique password of at least 12 characters; weak passwords such as `0000` are rejected by design.
 
+### Admin operations studio
+
+Staff with an `admin` role use `/admin/dashboard` for the protected operations workspace. The shell exposes role-aware controls for order fulfilment, prescription review, inventory and verification, product records and media, featured categories, customer/staff accounts, and the source-attributed care directory. Product image uploads are validated, stored through Cloudinary when configured, and can be removed from media storage from the product editor. Categories support ordering and featured placement without allowing deletion while products still reference them.
+
+Order status transitions are audited in SQL Server. When a status is changed, Aurevia Care attempts to email the registered customer address without rolling back the order if email delivery is unavailable. Configure the optional SMTP settings in `server/.env` (see `server/.env.example`) for production notifications; phone-only accounts are updated in the app but do not receive an email until an address is added.
+
 ## Production deployment
 
 The included GitHub Actions pipeline packages the React client with the Express API and deploys both to one Azure App Service. This same-origin setup keeps `/api` calls and HTTP-only login cookies on one HTTPS domain. Use Azure SQL or a managed SQL Server instance for data.

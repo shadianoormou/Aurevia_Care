@@ -1,9 +1,10 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
+import AdminLayout from "./components/AdminLayout.jsx";
 
 import Home from "./pages/Home.jsx";
 import Products from "./pages/Products.jsx";
@@ -28,9 +29,13 @@ const AdminPrescriptions = lazy(() => import("./pages/admin/AdminPrescriptions.j
 const AdminCareDirectory = lazy(() => import("./pages/admin/AdminCareDirectory.jsx"));
 
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const adminPage = (page, roles) => <AdminRoute roles={roles}><AdminLayout>{page}</AdminLayout></AdminRoute>;
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      {!isAdminRoute && <Navbar />}
       <main className="flex-1">
         <Suspense fallback={<div className="py-20 text-center text-sm text-primary-700">Loading your workspace…</div>}>
         <Routes>
@@ -50,37 +55,38 @@ function App() {
           <Route path="/care" element={<CareGuide />} />
 
           {/* Admin / Pharmacist protected */}
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route
             path="/admin/dashboard"
-            element={<AdminRoute roles={["admin", "pharmacist"]}><AdminDashboard /></AdminRoute>}
+            element={adminPage(<AdminDashboard />, ["admin", "pharmacist"])}
           />
           <Route
             path="/admin/products"
-            element={<AdminRoute roles={["admin"]}><AdminProducts /></AdminRoute>}
+            element={adminPage(<AdminProducts />, ["admin"])}
           />
           <Route
             path="/admin/categories"
-            element={<AdminRoute roles={["admin"]}><AdminCategories /></AdminRoute>}
+            element={adminPage(<AdminCategories />, ["admin"])}
           />
           <Route
             path="/admin/orders"
-            element={<AdminRoute roles={["admin", "pharmacist"]}><AdminOrders /></AdminRoute>}
+            element={adminPage(<AdminOrders />, ["admin", "pharmacist"])}
           />
           <Route
             path="/admin/users"
-            element={<AdminRoute roles={["admin"]}><AdminUsers /></AdminRoute>}
+            element={adminPage(<AdminUsers />, ["admin"])}
           />
           <Route
             path="/admin/inventory"
-            element={<AdminRoute roles={["admin", "pharmacist"]}><AdminInventory /></AdminRoute>}
+            element={adminPage(<AdminInventory />, ["admin", "pharmacist"])}
           />
           <Route
             path="/admin/prescriptions"
-            element={<AdminRoute roles={["admin", "pharmacist"]}><AdminPrescriptions /></AdminRoute>}
+            element={adminPage(<AdminPrescriptions />, ["admin", "pharmacist"])}
           />
           <Route
             path="/admin/care-directory"
-            element={<AdminRoute roles={["admin"]}><AdminCareDirectory /></AdminRoute>}
+            element={adminPage(<AdminCareDirectory />, ["admin"])}
           />
 
           {/* 404 */}
@@ -88,7 +94,7 @@ function App() {
         </Routes>
         </Suspense>
       </main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </div>
   );
 }

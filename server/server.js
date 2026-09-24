@@ -10,6 +10,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { connectDB } from "./config/db.js";
+import { isPostgres } from "./config/db.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
@@ -65,7 +66,7 @@ app.use(cookieParser());
 if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
 
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ success: true, service: "Aurevia Care API", database: "SQL Server", status: "healthy" });
+  res.status(200).json({ success: true, service: "Aurevia Care API", database: isPostgres ? "PostgreSQL" : "SQL Server", status: "healthy" });
 });
 
 app.use("/api/auth", authRoutes);
@@ -99,7 +100,13 @@ const startServer = async () => {
   app.listen(PORT, () => console.log(`Aurevia Care API running on port ${PORT} [${process.env.NODE_ENV || "development"}]`));
 };
 
-startServer().catch((error) => {
-  console.error(`Server startup failed: ${error.message}`);
-  process.exit(1);
-});
+export { app };
+
+// Vercel loads the Express app as a serverless handler; local/App Service
+// deployments still run the normal long-lived HTTP server.
+if (!process.env.VERCEL) {
+  startServer().catch((error) => {
+    console.error(`Server startup failed: ${error.message}`);
+    process.exit(1);
+  });
+}

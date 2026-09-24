@@ -1,11 +1,13 @@
 import dotenv from "dotenv";
 import tediousSql from "mssql";
 import nativeSql from "mssql/msnodesqlv8.js";
+import { PostgresPool, postgresSql } from "./postgres.js";
 
 // Load this once here because database driver selection happens while modules load.
 dotenv.config({ quiet: true });
 
-const sql = process.env.DB_DRIVER === "msnodesqlv8" ? nativeSql : tediousSql;
+const driverSql = process.env.DB_DRIVER === "msnodesqlv8" ? nativeSql : tediousSql;
+const isPostgres = Boolean(process.env.DATABASE_URL) || process.env.DB_DRIVER === "postgres";
 
 let poolPromise;
 
@@ -37,7 +39,21 @@ const getConfiguration = () => {
 
 export const connectDB = async () => {
   if (!poolPromise) {
-    poolPromise = new sql.ConnectionPool(getConfiguration())
+    if (isPostgres) {
+      if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL must be set when DB_DRIVER=postgres");
+      poolPromise = Promise.resolve(new PostgresPool(process.env.DATABASE_URL))
+        .then(async (pool) => {
+          await pool.query("CREATE SCHEMA IF NOT EXISTS dbo");
+          console.log("PostgreSQL connected");
+          return pool;
+        })
+        .catch((error) => {
+          poolPromise = undefined;
+          throw error;
+        });
+      return poolPromise;
+    }
+    poolPromise = new driverSql.ConnectionPool(getConfiguration())
       .connect()
       .then((pool) => {
         pool.on("error", (error) => console.error("SQL Server pool error:", error.message));
@@ -56,15 +72,35 @@ export const connectDB = async () => {
 export const getPool = connectDB;
 
 export const createRequest = async (transaction) => {
-  if (transaction) return new sql.Request(transaction);
+  if (isPostgres) {
+    if (transaction) return transaction.request();
+    const pool = await getPool();
+    return pool.request();
+  }
+  if (transaction) return new driverSql.Request(transaction);
   const pool = await getPool();
   return pool.request();
 };
 
 export const withTransaction = async (callback) => {
+  if (isPostgres) {
+    const pool = await getPool();
+    const client = await pool.connect();
+    await client.query("BEGIN");
+    try {
+      const result = await callback(client);
+      await client.query("COMMIT");
+      client.release();
+      return result;
+    } catch (error) {
+      try { await client.query("ROLLBACK"); } catch { /* preserve original error */ }
+      client.release();
+      throw error;
+    }
+  }
   const pool = await getPool();
-  const transaction = new sql.Transaction(pool);
-  await transaction.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
+  const transaction = new driverSql.Transaction(pool);
+  await transaction.begin(driverSql.ISOLATION_LEVEL.SERIALIZABLE);
   try {
     const result = await callback(transaction);
     await transaction.commit();
@@ -75,4 +111,5 @@ export const withTransaction = async (callback) => {
   }
 };
 
-export { sql };
+export { isPostgres };
+export const sql = isPostgres ? postgresSql : driverSql;

@@ -16,9 +16,9 @@ Aurevia Care pairs a premium pharmacy storefront with prescription-aware fulfilm
 | Source repository | [github.com/shadianoormou/aurevia-care](https://github.com/shadianoormou/aurevia-care) |
 | Local preview | [http://127.0.0.1:5173](http://127.0.0.1:5173) — available on the development machine |
 | Continuous delivery | [GitHub Actions](https://github.com/shadianoormou/aurevia-care/actions) — validates every push to `main` |
-| Public production site | **Pending Azure App Service and Azure SQL provisioning** — a public URL is intentionally not claimed before the full secure service is deployed |
+| Public production site | **Pending Vercel + Neon provisioning** — a public URL is intentionally not claimed before the full secure service is deployed |
 
-> The local preview is not an internet-facing public website. The production deployment pipeline is already in the repository and will publish the same application once the Azure production environment is connected.
+> The local preview is not an internet-facing public website. The Vercel deployment target uses Neon PostgreSQL; the Azure App Service path remains available for teams that already have an Azure subscription.
 
 ## Why it exists
 
@@ -34,7 +34,7 @@ Healthcare shopping needs more than a pretty catalogue. Aurevia Care gives custo
 - **Bangladesh Care Concierge** — Bangla/English text and voice questions with safety-first care routing across all 8 divisions and 64 districts, plus a curated directory for hospitals, doctors, diagnostics, blood support, and emergency contacts.
 - **Trustworthy directory workflow** — public entries must carry a source URL and verification date; admins can publish, update, or archive them without silently deleting history.
 - **Fulfilment controls** — role-based workspaces, transaction-safe stock reservation, cancellation rollback, immutable order snapshots, and inventory administration.
-- **SQL-first foundation** — GUIDs, foreign keys, check constraints, indexes, parameterised queries, migration scripts, location taxonomy, and audit timestamps in Microsoft SQL Server / Azure SQL.
+- **SQL-first foundation** — GUIDs, foreign keys, check constraints, indexes, parameterised queries, migration scripts, location taxonomy, and audit timestamps. Local development supports Microsoft SQL Server; hosted deployment supports Neon PostgreSQL through the compatibility layer.
 
 ## Product boundaries
 
@@ -51,7 +51,7 @@ This repository intentionally keeps health and pharmacy operations within safe b
 | --- | --- |
 | Customer web app | React 18, React Router, Vite, Tailwind CSS |
 | API | Node.js, Express 5, Helmet, express-rate-limit, JWT-backed HTTP-only cookies |
-| Database | Microsoft SQL Server / Azure SQL through `mssql` and `msnodesqlv8` for LocalDB |
+| Database | Microsoft SQL Server locally (`mssql`) or Neon PostgreSQL in the hosted Vercel target (`pg`) |
 | Files | Prescription documents in SQL Server with role and ownership checks; optional Cloudinary product images |
 | Document extraction | Optional Azure AI Document Intelligence `prebuilt-read` model |
 | Care navigator | Safety-first routing rules plus source-attributed local directory data in SQL Server |
@@ -116,7 +116,7 @@ flowchart TB
 
 ### Production request path
 
-GitHub Actions builds the React client and places it beside the Express application for a single-origin Azure App Service release. In production, the browser receives the application and calls `/api` from the same HTTPS domain; Express applies security controls and uses Azure SQL for persistent data. This avoids exposing an API key or a database connection to the browser and keeps the authenticated session cookie first-party.
+The hosted Vercel target serves the React client as a static build and the Express API as a serverless function. The browser calls `/api` from the same HTTPS domain; Express applies security controls and uses Neon PostgreSQL for persistent data. This avoids exposing a database connection to the browser and keeps the authenticated session cookie first-party.
 
 ## Repository layout
 
@@ -215,27 +215,30 @@ The storefront includes server-backed price and availability filters, category-f
 
 ## Production deployment
 
-The included GitHub Actions pipeline packages the React client with the Express API and deploys both to one Azure App Service. This same-origin setup keeps `/api` calls and HTTP-only login cookies on one HTTPS domain. Use Azure SQL or a managed SQL Server instance for data.
+The primary no-subscription target is Vercel + Neon PostgreSQL. `vercel.json` packages the React client and Express API on one HTTPS origin; the Neon integration injects `DATABASE_URL` without exposing it to the browser. Use the PostgreSQL migration command below before the first production request.
 
-The lowest-risk production choice for this SQL Server-based application is Azure SQL Database. A repeatable App Service + Azure SQL bootstrap template is available at [`infra/azure/main.bicep`](infra/azure/main.bicep), with the one-time command and GitHub configuration documented in [`infra/azure/README.md`](infra/azure/README.md). The deployment workflow also runs the SQL migrations before publishing when the Azure SQL secrets are present.
+```bash
+cd server
+npm run db:migrate:postgres
+```
+
+The repository also retains a repeatable App Service + Azure SQL bootstrap template at [`infra/azure/main.bicep`](infra/azure/main.bicep) for clients that have an Azure subscription. The Neon/PostgreSQL adapter keeps local SQL Server development and hosted deployment on the same application codebase.
 
 Configure production secrets with the host’s secret manager—never commit them. At a minimum, configure:
 
 ```env
 NODE_ENV=production
-DB_SERVER=your-server.database.windows.net
-DB_PORT=1433
-DB_NAME=aurevia_care
-DB_USER=your_sql_login
-DB_PASSWORD=your_strong_password
-DB_ENCRYPT=true
-DB_TRUST_SERVER_CERTIFICATE=false
+DATABASE_URL=postgresql://managed-by-neon
 JWT_SECRET=a_unique_secret_with_at_least_32_characters
-CLIENT_URL=https://your-app.azurewebsites.net
+CLIENT_URL=https://your-project.vercel.app
 COOKIE_SAME_SITE=lax
 ```
 
-Run `npm run db:migrate` against the target database before the API starts. The Azure App Service must run Node.js 20+ and have `SCM_DO_BUILD_DURING_DEPLOYMENT=true` configured so it restores the API runtime dependencies. A PCI-compliant payment provider must be integrated server-side before collecting card details.
+Run `npm run db:migrate:postgres` against the Neon database before the first production request. A PCI-compliant payment provider must be integrated server-side before collecting card details.
+
+### Vercel automatic deployment
+
+Import `https://github.com/shadianoormou/Aurevia_Care` as a Vercel project, connect the `aurevia-care-db` Neon resource to Production and Preview, and add `JWT_SECRET` plus `COOKIE_SAME_SITE=lax` in the project environment. Vercel then redeploys from `main` and injects the managed `DATABASE_URL` automatically.
 
 ### GitHub automatic deployment
 

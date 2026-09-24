@@ -38,6 +38,7 @@ const FIELD_CASE = new Map([
   ["sourceurl", "SourceUrl"], ["lastverifiedat", "LastVerifiedAt"], ["ispublished", "IsPublished"],
   ["division", "Division"], ["district", "District"], ["upazila", "Upazila"], ["country", "Country"],
   ["username", "UserName"], ["useremail", "UserEmail"], ["count", "Count"],
+  ["totalusers", "TotalUsers"], ["totalproducts", "TotalProducts"], ["totalorders", "TotalOrders"],
   ["totalsales", "TotalSales"], ["saledate", "SaleDate"], ["sales", "Sales"], ["orders", "Orders"],
 ]);
 

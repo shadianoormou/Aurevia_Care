@@ -18,6 +18,16 @@ const getUserById = async (id) => {
 const outputColumns = userColumns.replaceAll(", ", ", inserted.");
 const googleClient = new OAuth2Client();
 
+const verifyGoogleAccessToken = async (accessToken) => {
+  const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`);
+  if (!response.ok) throw httpError("Google account could not be verified. Please try again.", 401);
+  const payload = await response.json();
+  if (payload.aud !== process.env.GOOGLE_CLIENT_ID || !payload.sub || !payload.email || String(payload.email_verified) !== "true") {
+    throw httpError("Google account could not be verified", 401);
+  }
+  return payload;
+};
+
 const normalizePhone = (value) => {
   const raw = cleanText(value, 30).replace(/[\s().-]/g, "");
   if (!raw) return "";
@@ -125,17 +135,23 @@ export const loginUser = async (req, res, next) => {
 export const googleLogin = async (req, res, next) => {
   try {
     const credential = cleanText(req.body.credential, 6000);
-    if (!credential) throw httpError("Google credential is required");
+    const accessToken = cleanText(req.body.accessToken, 6000);
+    if (!credential && !accessToken) throw httpError("Google credential is required");
     if (!process.env.GOOGLE_CLIENT_ID) throw httpError("Google sign-in is not configured on this server", 503);
 
     let ticket;
-    try {
-      ticket = await googleClient.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
-    } catch {
-      throw httpError("Google account could not be verified. Please try again.", 401);
+    let payload;
+    if (accessToken) {
+      payload = await verifyGoogleAccessToken(accessToken);
+    } else {
+      try {
+        ticket = await googleClient.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
+      } catch {
+        throw httpError("Google account could not be verified. Please try again.", 401);
+      }
+      payload = ticket.getPayload();
     }
-    const payload = ticket.getPayload();
-    if (!payload?.sub || !payload.email || payload.email_verified !== true) throw httpError("Google account could not be verified", 401);
+    if (!payload?.sub || !payload.email || String(payload.email_verified) !== "true") throw httpError("Google account could not be verified", 401);
 
     const request = await createRequest();
     request.input("googleSubject", sql.NVarChar(255), payload.sub);

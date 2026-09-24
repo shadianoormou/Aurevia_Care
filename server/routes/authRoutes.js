@@ -49,7 +49,11 @@ router.post(
 router.post(
   "/google",
   authLimiter,
-  [body("credential").isString().isLength({ min: 20, max: 6000 }).withMessage("Valid Google credential is required")],
+  [
+    body("credential").optional({ values: "falsy" }).isString().isLength({ min: 20, max: 6000 }),
+    body("accessToken").optional({ values: "falsy" }).isString().isLength({ min: 20, max: 6000 }),
+    body().custom((_, { req }) => Boolean(req.body.credential || req.body.accessToken)).withMessage("Valid Google credential is required"),
+  ],
   validate,
   googleLogin
 );

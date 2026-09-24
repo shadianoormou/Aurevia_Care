@@ -24,6 +24,11 @@ jobs:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      DB_SERVER: ${{ secrets.DB_SERVER }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_ENCRYPT: "true"
 
     steps:
       - name: Check out source
@@ -62,15 +67,29 @@ jobs:
           rm -rf release/server/node_modules release/server/.env release/server/public
           cp -R client/dist/. release/server/public/
 
+      - name: Run Azure SQL migrations
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.AZURE_WEBAPP_NAME != '' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != '' && env.DB_SERVER != '' && env.DB_NAME != '' && env.DB_USER != '' && env.DB_PASSWORD != ''
+        working-directory: server
+        env:
+          DB_SERVER: ${{ env.DB_SERVER }}
+          DB_NAME: ${{ env.DB_NAME }}
+          DB_USER: ${{ env.DB_USER }}
+          DB_PASSWORD: ${{ env.DB_PASSWORD }}
+          DB_ENCRYPT: "true"
+          DB_TRUST_SERVER_CERTIFICATE: "false"
+        run: |
+          npm ci
+          npm run db:migrate
+
       - name: Detect Azure production configuration
         id: azure
         shell: bash
         run: |
-          if [ -n "$AZURE_WEBAPP_NAME" ] && [ -n "$AZURE_CLIENT_ID" ] && [ -n "$AZURE_TENANT_ID" ] && [ -n "$AZURE_SUBSCRIPTION_ID" ]; then
+          if [ -n "$AZURE_WEBAPP_NAME" ] && [ -n "$AZURE_CLIENT_ID" ] && [ -n "$AZURE_TENANT_ID" ] && [ -n "$AZURE_SUBSCRIPTION_ID" ] && [ -n "$DB_SERVER" ] && [ -n "$DB_NAME" ] && [ -n "$DB_USER" ] && [ -n "$DB_PASSWORD" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Azure deployment is waiting for the production GitHub environment configuration."
+            echo "Azure deployment is waiting for the production GitHub environment and Azure SQL configuration."
           fi
 
       - name: Sign in to Azure with OpenID Connect

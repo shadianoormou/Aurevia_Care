@@ -217,6 +217,8 @@ The storefront includes server-backed price and availability filters, category-f
 
 The included GitHub Actions pipeline packages the React client with the Express API and deploys both to one Azure App Service. This same-origin setup keeps `/api` calls and HTTP-only login cookies on one HTTPS domain. Use Azure SQL or a managed SQL Server instance for data.
 
+The lowest-risk production choice for this SQL Server-based application is Azure SQL Database. A repeatable App Service + Azure SQL bootstrap template is available at [`infra/azure/main.bicep`](infra/azure/main.bicep), with the one-time command and GitHub configuration documented in [`infra/azure/README.md`](infra/azure/README.md). The deployment workflow also runs the SQL migrations before publishing when the Azure SQL secrets are present.
+
 Configure production secrets with the host’s secret manager—never commit them. At a minimum, configure:
 
 ```env

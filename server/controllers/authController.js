@@ -47,6 +47,34 @@ const findUserByIdentity = async ({ email = null, phone = null }) => {
   return recordset[0] || null;
 };
 
+// A hosted deployment can be built without running the optional seed command.
+// If the explicitly configured administrator signs in for the first time,
+// provision that account at runtime so a fresh Neon database is recoverable.
+const ensureConfiguredAdmin = async (email, password) => {
+  const configuredEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const configuredPassword = process.env.ADMIN_PASSWORD;
+  if (!configuredEmail || !configuredPassword || email !== configuredEmail || password !== configuredPassword) return null;
+
+  const request = await createRequest();
+  request.input("email", sql.NVarChar(254), configuredEmail);
+  const existing = await request.query(`SELECT ${userColumns}, PasswordHash, GoogleSubject FROM dbo.Users WHERE Email = @email`);
+  const passwordHash = await bcrypt.hash(configuredPassword, 12);
+  request.input("name", sql.NVarChar(120), process.env.ADMIN_NAME || "Aurevia Care Administrator");
+  request.input("passwordHash", sql.NVarChar(255), passwordHash);
+  if (existing.recordset[0]) {
+    request.input("id", sql.UniqueIdentifier, existing.recordset[0].Id);
+    const updated = await request.query(`UPDATE dbo.Users SET Name = @name, PasswordHash = @passwordHash,
+      Role = 'admin', IsActive = 1, UpdatedAt = SYSUTCDATETIME()
+      OUTPUT inserted.${outputColumns} WHERE Id = @id`);
+    return updated.recordset[0];
+  }
+
+  const created = await request.query(`INSERT INTO dbo.Users (Name, Email, PasswordHash, Role)
+    OUTPUT inserted.${outputColumns}
+    VALUES (@name, @email, @passwordHash, 'admin')`);
+  return created.recordset[0];
+};
+
 export const registerUser = async (req, res, next) => {
   try {
     const name = cleanText(req.body.name, 120);
@@ -86,7 +114,8 @@ export const loginUser = async (req, res, next) => {
     const phone = email ? null : normalizePhone(identifier);
     if ((!email && !isValidPhone(phone)) || typeof password !== "string") throw httpError("Enter a valid email or Bangladesh phone number and your password");
 
-    const row = await findUserByIdentity({ email, phone });
+    let row = await ensureConfiguredAdmin(email, password);
+    if (!row) row = await findUserByIdentity({ email, phone });
     if (!row || !(await bcrypt.compare(password, row.PasswordHash))) throw httpError("Invalid email or password", 401);
     if (!row.IsActive) throw httpError("This account has been deactivated", 403);
     sendTokenResponse(serializeUser(row), 200, res);

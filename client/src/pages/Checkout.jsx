@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { FiAlertTriangle } from "react-icons/fi";
+import { FiAlertTriangle, FiShield } from "react-icons/fi";
 import api from "../api/axios.js";
 import { useCart } from "../context/CartContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -18,6 +18,7 @@ const Checkout = () => {
   const [prescriptionId, setPrescriptionId] = useState("");
 
   const hasPrescriptionItems = cartItems.some((item) => item.requiresPrescription);
+  const prescriptionItems = cartItems.filter((item) => item.requiresPrescription);
 
   useEffect(() => {
     if (!hasPrescriptionItems) return;
@@ -149,10 +150,13 @@ const Checkout = () => {
             <div className="border-t border-gray-100 pt-4">
               <div className="flex items-start gap-3 bg-accent-50 text-accent-700 text-sm rounded-lg px-4 py-3">
                 <FiAlertTriangle className="shrink-0 mt-0.5" />
-                <p>
-                  Your order contains prescription-required medicine. By placing this
-                  order you confirm that you have a valid prescription for these items.
-                </p>
+                <div>
+                  <p>Your cart includes prescription-only medicine. These items cannot be supplied without an approved prescription:</p>
+                  <ul className="mt-2 list-disc pl-4 font-semibold">
+                    {prescriptionItems.map((item) => <li key={item._id}>{item.name} × {item.quantity}</li>)}
+                  </ul>
+                  <p className="mt-2 font-normal">Remove these items to place an OTC-only order, or select an approved prescription below.</p>
+                </div>
               </div>
               <label className="flex items-start gap-2 text-sm text-gray-700 mt-3">
                 <input
@@ -191,7 +195,7 @@ const Checkout = () => {
           <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
             {cartItems.map((item) => (
               <div key={item._id} className="flex justify-between text-sm text-gray-600">
-                <span className="line-clamp-1">{item.name} × {item.quantity}</span>
+                <span className="line-clamp-1 flex items-center gap-1.5">{item.requiresPrescription && <FiShield className="shrink-0 text-accent-600" title="Prescription required" />} {item.name} × {item.quantity}</span>
                 <span>{formatPrice(item.price * item.quantity)}</span>
               </div>
             ))}

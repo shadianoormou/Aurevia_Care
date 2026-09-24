@@ -9,10 +9,12 @@ const seedEnv = {
   ...process.env,
   DB_DRIVER: "postgres",
   ALLOW_PRODUCTION_SEED: "true",
-  SKIP_ADMIN_SEED: "true",
+  // Create/update the production administrator only when the project has
+  // explicitly supplied both secret values. Fresh deployments without those
+  // secrets still get the public catalogue and never create a weak default.
+  SKIP_ADMIN_SEED: process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD ? "false" : "true",
 };
 
 run("npm", ["--prefix", "server", "run", "db:migrate:postgres"], seedEnv);
 run("npm", ["--prefix", "server", "run", "seed"], seedEnv);
 run("npm", ["--prefix", "client", "run", "build"], process.env);
-

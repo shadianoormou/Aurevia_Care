@@ -257,10 +257,15 @@ try {
     const accountRequest = pool.request();
     accountRequest.input("email", sql.NVarChar(254), adminEmail);
     const existingAdmin = await accountRequest.query("SELECT Id FROM dbo.Users WHERE Email = @email");
+    accountRequest.input("name", sql.NVarChar(120), process.env.ADMIN_NAME || "Aurevia Care Owner");
+    accountRequest.input("passwordHash", sql.NVarChar(255), await bcrypt.hash(adminPassword, 12));
     if (!existingAdmin.recordset[0]) {
-      accountRequest.input("name", sql.NVarChar(120), process.env.ADMIN_NAME || "Aurevia Care Owner");
-      accountRequest.input("passwordHash", sql.NVarChar(255), await bcrypt.hash(adminPassword, 12));
       await accountRequest.query("INSERT INTO dbo.Users (Name, Email, PasswordHash, Role) VALUES (@name, @email, @passwordHash, 'admin')");
+    } else {
+      // Keep the explicitly configured production administrator usable after
+      // a password rotation, and elevate an existing matching account safely.
+      accountRequest.input("id", sql.UniqueIdentifier, existingAdmin.recordset[0].Id);
+      await accountRequest.query("UPDATE dbo.Users SET Name = @name, PasswordHash = @passwordHash, Role = 'admin', IsActive = 1, UpdatedAt = SYSUTCDATETIME() WHERE Id = @id");
     }
   }
 

@@ -108,11 +108,11 @@ const findEntries = async ({ kind, query, division, district, upazila, limit = 8
     SELECT TOP (@limit) ${selectColumns}
     FROM dbo.CareDirectoryEntries
     WHERE (${includeUnpublished ? "1 = 1" : "IsPublished = 1"})
-      AND (@kind IS NULL OR Kind = @kind)
-      AND (@division IS NULL OR Division = @division)
-      AND (@district IS NULL OR District = @district)
-      AND (@upazila IS NULL OR Upazila = @upazila)
-      AND (@query IS NULL OR Name LIKE '%' + @query + '%' OR Specialty LIKE '%' + @query + '%'
+      AND (CAST(@kind AS VARCHAR(24)) IS NULL OR Kind = @kind)
+      AND (CAST(@division AS VARCHAR(80)) IS NULL OR Division = @division)
+      AND (CAST(@district AS VARCHAR(80)) IS NULL OR District = @district)
+      AND (CAST(@upazila AS VARCHAR(120)) IS NULL OR Upazila = @upazila)
+      AND (CAST(@query AS VARCHAR(240)) IS NULL OR Name LIKE '%' + @query + '%' OR Specialty LIKE '%' + @query + '%'
         OR ConditionsJson LIKE '%' + @query + '%' OR Address LIKE '%' + @query + '%'
         OR Division LIKE '%' + @query + '%' OR District LIKE '%' + @query + '%' OR Upazila LIKE '%' + @query + '%')
     ORDER BY CASE WHEN Specialty LIKE '%' + COALESCE(@query, '') + '%' THEN 0 ELSE 1 END,
@@ -130,8 +130,8 @@ const findCoverage = async ({ division, district } = {}) => {
       MAX(LastVerifiedAt) AS LastVerifiedAt
     FROM dbo.CareDirectoryEntries
     WHERE IsPublished = 1
-      AND (@division IS NULL OR Division = @division)
-      AND (@district IS NULL OR District = @district)
+      AND (CAST(@division AS VARCHAR(80)) IS NULL OR Division = @division)
+      AND (CAST(@district AS VARCHAR(80)) IS NULL OR District = @district)
     GROUP BY Kind
     ORDER BY Kind
   `);

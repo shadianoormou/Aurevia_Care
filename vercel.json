@@ -9,6 +9,8 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.mjs" },
     { "handle": "filesystem" },
+    { "src": "/(assets/.*)", "dest": "/client/$1" },
+    { "src": "/(.*\\.(?:js|css|svg|png|jpg|jpeg|webp|ico|woff2?))", "dest": "/client/$1" },
     { "src": "/(.*)", "dest": "/client/index.html" }
   ]
 }

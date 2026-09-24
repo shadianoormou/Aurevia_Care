@@ -6,6 +6,14 @@
     { "src": "api/index.mjs", "use": "@vercel/node" },
     { "src": "client/package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
   ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" }
+      ]
+    }
+  ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.mjs" },
     { "handle": "filesystem" },

@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import tediousSql from "mssql";
 import { readFile } from "node:fs/promises";
 import { PostgresPool, postgresSql } from "./postgres.js";
+import { POSTGRES_BOOTSTRAP } from "./postgresBootstrap.js";
 
 // Load this once here because database driver selection happens while modules load.
 dotenv.config({ quiet: true });
@@ -50,6 +51,7 @@ export const connectDB = async () => {
             if (error.code !== "ENOENT") throw error;
             console.warn("PostgreSQL migration file is not bundled; using the schema created during deployment.");
           }
+          await pool.query(POSTGRES_BOOTSTRAP);
           console.log("PostgreSQL connected");
           return pool;
         })

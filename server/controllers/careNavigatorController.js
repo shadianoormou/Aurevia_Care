@@ -43,7 +43,7 @@ const triagePlan = (rawMessage) => {
   const emergencyTerms = [
     "chest pain", "বুকে ব্যথা", "difficulty breathing", "shortness of breath", "শ্বাস কষ্ট", "শ্বাসকষ্ট",
     "unconscious", "faint", "অজ্ঞান", "severe bleeding", "রক্তক্ষরণ", "stroke", "paralysis", "প্যারালাইসিস",
-    "suicide", "self harm", "আত্মহত্যা", "খিঁচুনি", "seizure",
+    "suicide", "self harm", "আত্মহত্যা", "খিঁচুনি", "seizure", "sudden weakness", "one-sided weakness", "হঠাৎ দুর্বল", "হঠাৎ পা অবশ",
   ];
   if (includesAny(message, emergencyTerms)) {
     return {
@@ -66,13 +66,15 @@ const triagePlan = (rawMessage) => {
   }
 
   const routes = [
+    [["one-sided leg swelling", "leg swelling and breath", "varicose", "varicose vein", "swollen leg", "পা ফুলে", "পা ফোলা", "পায়ের ফোলা", "পায়ের ফোলা", "শিরা ফুলে"], "Vascular / medicine", "পা ফোলা ও vascular care", "vascular"],
+    [["leg numb", "leg weakness", "numbness in leg", "পা অবশ", "পায়ে ঝিনঝিনি", "পায়ে ঝিনঝিনি", "হাঁটতে পারছি না"], "Neurology", "স্নায়ু ও movement care", "neurology"],
     [["toothache", "tooth pain", "dental pain", "gum pain", "tooth ache", "dath betha", "daat betha", "dant betha", "dat betha", "dath", "দাঁত ব্যথা", "দাঁতের ব্যথা", "দাত ব্যথা", "দাঁতের যন্ত্রণা", "মাড়ি ব্যথা", "মাড়ি ব্যথা", "দাঁত", "দাত", "দাঁতের"], "Dental", "দাঁত ও মুখের care", "tooth"],
     [["pregnan", "period", "menstrual", "gynae", "gyne", "গর্ভ", "প্রেগ", "মাসিক", "নারী"], "Gynecology & obstetrics", "নারী ও প্রসূতি care", "gynecology"],
     [["child", "baby", "infant", "pediatric", "paediatric", "শিশু", "বাচ্চা"], "Pediatrics", "শিশু care", "child"],
     [["skin", "rash", "acne", "allergy", "চামড়া", "ত্বক", "ফুসকুড়ি", "এলার্জ"], "Dermatology", "ত্বক ও allergy care", "skin"],
     [["eye", "vision", "চোখ", "দৃষ্টি"], "Ophthalmology", "চোখের care", "eye"],
     [["tooth", "dental", "gum", "দাঁত", "মাড়ি"], "Dental", "dental care", "tooth"],
-    [["bone", "joint", "fracture", "back pain", "হাড়", "জয়েন্ট", "ভাঙা", "কোমর"], "Orthopedics", "হাড় ও joint care", "orthopedic"],
+    [["bone", "joint", "fracture", "back pain", "leg pain", "pain in leg", "leg ache", "knee pain", "ankle pain", "foot pain", "calf pain", "muscle pain", "পা ব্যথা", "পায়ে ব্যথা", "পায়ে ব্যথা", "পায়ের ব্যথা", "পায়ের ব্যথা", "হাঁটু ব্যথা", "গোড়ালি ব্যথা", "গোড়ালি ব্যথা", "পেশিতে ব্যথা", "পেশী ব্যথা", "হাড়", "জয়েন্ট", "ভাঙা", "কোমর"], "Orthopedics", "হাড়, joint ও leg pain care", "orthopedic"],
     [["heart", "palpitation", "cardiac", "heart pain", "heart attack", "angina", "buk dhorfor", "buk dorfor", "হার্ট", "হৃদ", "বুক ধড়ফড়", "বুক ধড়ফড়"], "Cardiology", "heart care", "heart"],
     [["headache", "migraine", "neurology", "head", "matha betha", "মাথাব্যথা", "মাথা ব্যথা", "মাইগ্রেন", "নিউরো"], "Neurology", "neurology care", "neurology"],
     [["cough", "kashi", "asthma", "breathing", "chest", "cold", "sordi", "shordi", "কাশি", "হাঁপানি", "শ্বাস"], "Chest & respiratory medicine", "respiratory care", "respiratory"],
@@ -119,6 +121,28 @@ const findEntries = async ({ kind, query, division, district, upazila, limit = 8
   return recordset.map(serializeEntry);
 };
 
+const findCoverage = async ({ division, district } = {}) => {
+  const request = await createRequest();
+  request.input("division", sql.NVarChar(80), division || null);
+  request.input("district", sql.NVarChar(80), district || null);
+  const { recordset } = await request.query(`
+    SELECT Kind, COUNT(1) AS RecordCount, COUNT(DISTINCT District) AS DistrictCount,
+      MAX(LastVerifiedAt) AS LastVerifiedAt
+    FROM dbo.CareDirectoryEntries
+    WHERE IsPublished = 1
+      AND (@division IS NULL OR Division = @division)
+      AND (@district IS NULL OR District = @district)
+    GROUP BY Kind
+    ORDER BY Kind
+  `);
+  return recordset.map((row) => ({
+    kind: row.Kind,
+    recordCount: Number(row.RecordCount || 0),
+    districtCount: Number(row.DistrictCount || 0),
+    lastVerifiedAt: row.LastVerifiedAt,
+  }));
+};
+
 export const getDirectory = async (req, res, next) => {
   try {
     const kind = compact(req.query.kind);
@@ -148,6 +172,30 @@ export const getLocations = async (_req, res) => {
   res.status(200).json({ success: true, country: "Bangladesh", locations: serializeLocationOptions() });
 };
 
+export const getCoverage = async (req, res, next) => {
+  try {
+    const requestedLocation = compact(req.query.location || req.query.city || "");
+    const location = matchBangladeshLocation(requestedLocation) || {
+      division: normalizeLocationPart(req.query.division),
+      district: normalizeLocationPart(req.query.district),
+      upazila: normalizeLocationPart(req.query.upazila),
+      label: [req.query.upazila, req.query.district, req.query.division].filter(Boolean).join(", ") || "Bangladesh",
+    };
+    const coverage = await findCoverage(location);
+    res.status(200).json({
+      success: true,
+      scope: location.label,
+      location,
+      coverage,
+      sourcePolicy: "Coverage counts include only published, source-attributed records. Missing coverage is not a reason to infer or invent a provider.",
+      officialRegistry: {
+        label: "DGHS Facility Registry",
+        url: "https://hrm.dghs.gov.bd/public/facility-registry",
+      },
+    });
+  } catch (error) { next(error); }
+};
+
 export const askConcierge = async (req, res, next) => {
   try {
     const message = compact(req.body.message);
@@ -159,8 +207,12 @@ export const askConcierge = async (req, res, next) => {
     let entries = await findEntries({ kind: plan.kind, query: directoryQuery, ...locationFilter, limit: 10 });
     // Never fill a specialist request with an unrelated doctor. An empty result is safer
     // than showing a cardiologist for cough, or an orthopedist for tooth pain.
-    if (!entries.length && plan.kind === "doctor") {
-      entries = await findEntries({ kind: "facility", query: "", ...locationFilter, limit: 4 });
+    // When a specialist match exists, add a separate verified hospital/OPD referral so
+    // the user is not funnelled into one private chamber as if it were the only option.
+    if (plan.kind === "doctor") {
+      const facilities = await findEntries({ kind: "facility", query: "", ...locationFilter, limit: 2 });
+      const insertAt = Math.min(entries.length, 2);
+      entries = [...entries.slice(0, insertAt), ...facilities.slice(0, 1), ...entries.slice(insertAt)];
     }
     res.status(200).json({
       success: true,
@@ -174,4 +226,4 @@ export const askConcierge = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-export { allowedKinds, findEntries, serializeEntry, triagePlan };
+export { allowedKinds, findEntries, findCoverage, serializeEntry, triagePlan };

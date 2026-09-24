@@ -1,0 +1,22 @@
+{
+  "records": [],
+  "schema": {
+    "kind": "doctor | facility | diagnostic | blood_bank | emergency",
+    "name": "Official provider or facility name",
+    "specialty": "Department or service",
+    "conditions": ["search term"],
+    "address": "Full address",
+    "phone": "Published phone number",
+    "email": "Published email address",
+    "availability": "Published hours or appointment note",
+    "verificationNote": "How the record was verified",
+    "sourceLabel": "DGHS Facility Registry",
+    "sourceUrl": "https://official-source.example/record",
+    "lastVerifiedAt": "2026-09-24",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "upazila": "",
+    "country": "Bangladesh",
+    "isPublished": true
+  }
+}

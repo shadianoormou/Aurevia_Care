@@ -27,7 +27,11 @@ const Products = () => {
   const category = searchParams.get("category") || "";
   const subcategory = searchParams.get("subcategory") || "";
   const sort = searchParams.get("sort") || "popular";
+  const minPrice = searchParams.get("minPrice") || "";
+  const maxPrice = searchParams.get("maxPrice") || "";
+  const inStock = searchParams.get("inStock") === "true";
   const page = Number(searchParams.get("page") || 1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const featuredCategories = useMemo(() => categories.filter((item) => item.isFeatured), [categories]);
   const activeCategory = useMemo(() => categories.find((item) => item._id === category), [categories, category]);
 
@@ -57,11 +61,11 @@ const Products = () => {
         const { data } = await api.get("/products/search", { params: { q: symptom } });
         setProducts(data.products); setPages(1); setTotal(data.products.length); setDisclaimer(data.disclaimer);
       } else {
-        const { data } = await api.get("/products", { params: { keyword, category, subcategory, sort, page, limit: 16 } });
+        const { data } = await api.get("/products", { params: { keyword, category, subcategory, sort, minPrice: minPrice || undefined, maxPrice: maxPrice || undefined, inStock: inStock || undefined, page, limit: 16 } });
         setProducts(data.products); setPages(data.pages); setTotal(data.total);
       }
     } catch { setProducts([]); setTotal(0); } finally { setLoading(false); }
-  }, [keyword, symptom, category, subcategory, sort, page]);
+  }, [keyword, symptom, category, subcategory, sort, minPrice, maxPrice, inStock, page]);
 
   useEffect(() => { loadCategories(); }, [loadCategories]);
   useEffect(() => { loadProducts(); }, [loadProducts]);
@@ -96,7 +100,9 @@ const Products = () => {
 
         {disclaimer && <div className="mt-7 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">⚠️ {disclaimer}</div>}
 
-        <div className="catalog-toolbar mt-8"><div className="flex items-center gap-2 text-sm font-bold text-primary-800"><FiFilter /> {loading ? "Updating collection…" : `${total} items curated for you`}</div><div className="flex items-center gap-3"><label className="relative hidden sm:block"><FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" /><input value={keyword} onChange={(event) => updateParams({ keyword: event.target.value, symptom: "" })} className="rounded-xl border border-primary-100 bg-white py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300" placeholder="Search the shop" /></label><label className="inline-flex items-center gap-2 text-xs font-bold text-slate-600"><FiSliders /><select value={sort} onChange={(event) => updateParams({ sort: event.target.value })} className="bg-transparent focus:outline-none"><option value="popular">Most loved</option><option value="rating">Top rated</option><option value="price_asc">Price: low first</option><option value="price_desc">Price: high first</option></select></label></div></div>
+          <div className="catalog-toolbar mt-8"><div className="flex items-center gap-2 text-sm font-bold text-primary-800"><FiFilter /> {loading ? "Updating collection…" : `${total} items curated for you`}</div><div className="flex items-center gap-2"><button type="button" onClick={() => setFiltersOpen((open) => !open)} className={`catalog-filter-toggle ${filtersOpen || minPrice || maxPrice || inStock ? "catalog-filter-toggle-active" : ""}`}><FiSliders /> Filters</button><label className="relative hidden sm:block"><FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" /><input value={keyword} onChange={(event) => updateParams({ keyword: event.target.value, symptom: "" })} className="rounded-xl border border-primary-100 bg-white py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300" placeholder="Search the shop" /></label><label className="inline-flex items-center gap-2 text-xs font-bold text-slate-600"><FiSliders /><select value={sort} onChange={(event) => updateParams({ sort: event.target.value })} className="bg-transparent focus:outline-none"><option value="popular">Most loved</option><option value="rating">Top rated</option><option value="price_asc">Price: low first</option><option value="price_desc">Price: high first</option></select></label></div></div>
+
+          {filtersOpen && <div className="catalog-filter-panel mt-3"><div><label className="catalog-filter-label">Minimum price</label><input type="number" min="0" value={minPrice} onChange={(event) => updateParams({ minPrice: event.target.value })} placeholder="৳ 0" className="input-field mt-1 text-sm" /></div><div><label className="catalog-filter-label">Maximum price</label><input type="number" min="0" value={maxPrice} onChange={(event) => updateParams({ maxPrice: event.target.value })} placeholder="৳ 5,000" className="input-field mt-1 text-sm" /></div><label className="catalog-stock-toggle"><input type="checkbox" checked={inStock} onChange={(event) => updateParams({ inStock: event.target.checked ? "true" : "" })} /><span><b>Only show available items</b><small>Hide products that are currently out of stock</small></span></label><button type="button" onClick={() => { updateParams({ minPrice: "", maxPrice: "", inStock: "" }); setFiltersOpen(false); }} className="catalog-clear-filter">Clear filters</button></div>}
 
         {loading ? <Loader /> : products.length === 0 ? <div className="catalog-empty"><p className="font-display text-2xl text-primary-900">Nothing here just yet.</p><p>Try another category, a simpler search, or ask the Care Concierge for help finding the right route.</p><button onClick={() => chooseCategory("")} className="btn-primary mt-5">View all collections</button></div> : <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 mt-5">{products.map((product) => <ProductCard key={product._id} product={product} />)}</div>}
 

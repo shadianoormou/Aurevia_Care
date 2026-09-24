@@ -128,8 +128,10 @@ server/                   Express API
   migrations/             Idempotent SQL Server schema migrations
   controllers/            Domain and workflow logic
   routes/                 HTTP route definitions
+  data/                   Import templates and symptom/location reference data
   seed/                   Development catalogue and care-directory bootstrap
   scripts/migrate.js      Migration runner
+  scripts/importCareDirectory.js  Validated source-attributed directory importer
 ```
 
 ## Run locally
@@ -209,6 +211,8 @@ Staff with an `admin` role use `/admin/dashboard` for the protected operations w
 
 Order status transitions are audited in SQL Server. When a status is changed, Aurevia Care attempts to email the registered customer address without rolling back the order if email delivery is unavailable. Configure the optional SMTP settings in `server/.env` (see `server/.env.example`) for production notifications; phone-only accounts are updated in the app but do not receive an email until an address is added.
 
+The storefront includes server-backed price and availability filters, category-first discovery, resilient image fallbacks, and a protected error boundary. Customers can follow an order through a visual received → confirmed → preparing → shipped → delivered timeline, while staff can open a read-only workspace settings drawer for connection and role safeguards. These surfaces are intentionally presentation-safe: operational secrets remain server-side.
+
 ## Production deployment
 
 The included GitHub Actions pipeline packages the React client with the Express API and deploys both to one Azure App Service. This same-origin setup keeps `/api` calls and HTTP-only login cookies on one HTTPS domain. Use Azure SQL or a managed SQL Server instance for data.
@@ -248,10 +252,23 @@ The workflow uses GitHub-to-Azure OpenID Connect, so no long-lived publish-profi
 
 The initial Rajshahi entries point only to institutional sources such as RMCH, Ibn Sina Trust, Bangladesh Red Crescent Blood Center, Christian Mission Hospital Rajshahi, and the DGHS facility registry. The operating team should verify schedules, contacts, and blood-support availability directly with providers before publishing or refreshing each record.
 
+The location layer is nationwide-ready: the public care guide exposes all 8 divisions and 64 districts, and every directory query is filtered by the selected division/district. Concierge intent routing includes dental, respiratory, orthopaedic leg/knee/ankle pain, vascular swelling, neurological weakness/numbness, women’s health, paediatrics, dermatology, ophthalmology, cardiology, diabetes, mental health, and urinary/kidney care. A specialist result is never replaced with an unrelated doctor; a verified hospital/OPD referral is shown separately when available. Coverage is deliberately evidence-based—an empty district shows the official [DGHS Facility Registry](https://hrm.dghs.gov.bd/public/facility-registry) instead of inventing a hospital, doctor, diagnostic centre, phone number, or blood-stock claim. A complete national directory requires an authorised export or API feed for facilities and a separately verified provider roster for doctors.
+
+To load a verified export, create a JSON file using `server/data/care-directory.import.example.json` as the schema and run:
+
+```powershell
+cd server
+npm run directory:import -- C:\path\to\verified-care-directory.json
+```
+
+The importer rejects unsupported kinds, unknown Bangladesh divisions/districts, missing addresses, non-HTTPS sources, and records without a verification date. Matching `Name + Kind` rows are updated; new rows are inserted in one SQL transaction. This makes the import repeatable while keeping source attribution and location scope attached to every published record.
+
 Public endpoints are intentionally narrow:
 
 ```text
 GET  /api/care-navigator/directory?kind=doctor&q=orthopedics
+GET  /api/care-navigator/locations
+GET  /api/care-navigator/coverage?division=Dhaka&district=Dhaka
 POST /api/care-navigator/ask  { "message": "হাড়ে ব্যথা হলে কোন ডাক্তার?" }
 ```
 

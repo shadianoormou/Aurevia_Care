@@ -1,12 +1,11 @@
 import dotenv from "dotenv";
 import tediousSql from "mssql";
-import nativeSql from "mssql/msnodesqlv8.js";
 import { PostgresPool, postgresSql } from "./postgres.js";
 
 // Load this once here because database driver selection happens while modules load.
 dotenv.config({ quiet: true });
 
-const driverSql = process.env.DB_DRIVER === "msnodesqlv8" ? nativeSql : tediousSql;
+let driverSql = tediousSql;
 const isPostgres = Boolean(process.env.DATABASE_URL) || process.env.DB_DRIVER === "postgres";
 
 let poolPromise;
@@ -52,6 +51,10 @@ export const connectDB = async () => {
           throw error;
         });
       return poolPromise;
+    }
+    if (process.env.DB_DRIVER === "msnodesqlv8") {
+      const nativeSql = await import("mssql/msnodesqlv8.js");
+      driverSql = nativeSql.default || nativeSql;
     }
     poolPromise = new driverSql.ConnectionPool(getConfiguration())
       .connect()

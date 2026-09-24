@@ -37,8 +37,13 @@ const findUserByIdentity = async ({ email = null, phone = null }) => {
   const request = await createRequest();
   request.input("email", sql.NVarChar(254), email);
   request.input("phone", sql.NVarChar(30), phone);
+  // COALESCE keeps nullable parameters typeable on PostgreSQL (Neon). The
+  // previous `@email IS NOT NULL` form can fail before execution with
+  // "could not determine data type of parameter $1" when the other identity
+  // field is null, which made every production password login return 500.
   const { recordset } = await request.query(`SELECT ${userColumns}, PasswordHash, GoogleSubject FROM dbo.Users
-    WHERE (@email IS NOT NULL AND Email = @email) OR (@phone IS NOT NULL AND Phone = @phone)`);
+    WHERE Email = COALESCE(@email, '__no_matching_email__')
+       OR Phone = COALESCE(@phone, '__no_matching_phone__')`);
   return recordset[0] || null;
 };
 

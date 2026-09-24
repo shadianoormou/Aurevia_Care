@@ -27,6 +27,11 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+const allowedOrigins = new Set([
+  ...clientUrl.split(",").map((value) => value.trim()).filter(Boolean),
+  "https://aurevia-care.vercel.app",
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "",
+].filter(Boolean));
 const productionClientPath = path.join(__dirname, "public");
 const hasProductionClient = process.env.NODE_ENV === "production"
   && existsSync(path.join(productionClientPath, "index.html"));
@@ -47,7 +52,13 @@ app.use(helmet({
   },
 }));
 app.use(cors({
-  origin: clientUrl,
+  // Keep local development working while allowing the deployed Vercel
+  // frontend to send credentialed requests even if an old localhost
+  // CLIENT_URL value remains in the production environment.
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+    return callback(new Error("Origin not allowed by CORS"));
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],

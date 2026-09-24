@@ -65,8 +65,13 @@ app.use(cookieParser());
 
 if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
 
-app.get("/api/health", (req, res) => {
-  res.status(200).json({ success: true, service: "Aurevia Care API", database: isPostgres ? "PostgreSQL" : "SQL Server", status: "healthy" });
+app.get("/api/health", async (req, res) => {
+  try {
+    await connectDB();
+    res.status(200).json({ success: true, service: "Aurevia Care API", database: isPostgres ? "PostgreSQL" : "SQL Server", status: "healthy" });
+  } catch (error) {
+    res.status(503).json({ success: false, service: "Aurevia Care API", database: isPostgres ? "PostgreSQL" : "SQL Server", status: "degraded", message: error.message });
+  }
 });
 
 app.use("/api/auth", authRoutes);

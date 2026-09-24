@@ -40,6 +40,9 @@ app.disable("x-powered-by");
 app.set("trust proxy", 1);
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
+  // Google Identity Services uses a popup when FedCM is unavailable. Allow
+  // that trusted OAuth popup to communicate back to this same-origin app.
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   contentSecurityPolicy: {
     directives: {
       "script-src": ["'self'", "https://accounts.google.com"],

@@ -3,7 +3,7 @@
   "installCommand": "npm install && npm install --prefix client",
   "buildCommand": "npm --prefix client run build",
   "functions": {
-    "api/index.mjs": { "includeFiles": ["server/migrations-postgres/001_schema.sql"] }
+    "api/index.mjs": { "includeFiles": "server/migrations-postgres/001_schema.sql" }
   },
   "builds": [
     { "src": "api/index.mjs", "use": "@vercel/node" },

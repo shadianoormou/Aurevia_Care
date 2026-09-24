@@ -19,6 +19,10 @@
     { "handle": "filesystem" },
     { "src": "/(assets/.*)", "dest": "/client/$1" },
     { "src": "/(.*\\.(?:js|css|svg|png|jpg|jpeg|webp|ico|woff2?))", "dest": "/client/$1" },
-    { "src": "/(.*)", "dest": "/client/index.html" }
+    {
+      "src": "/(.*)",
+      "dest": "/client/index.html",
+      "headers": { "Cross-Origin-Opener-Policy": "same-origin-allow-popups" }
+    }
   ]
 }

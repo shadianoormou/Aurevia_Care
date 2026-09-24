@@ -235,9 +235,10 @@ try {
   if (process.env.NODE_ENV === "production" && process.env.ALLOW_PRODUCTION_SEED !== "true") {
     throw new Error("Refusing to seed production. Set ALLOW_PRODUCTION_SEED=true only for an intentional initial catalogue import.");
   }
+  const skipAdmin = process.env.SKIP_ADMIN_SEED === "true";
   const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminEmail || !adminPassword || adminEmail === "owner@example.com" || adminPassword.length < 12) {
+  if (!skipAdmin && (!adminEmail || !adminPassword || adminEmail === "owner@example.com" || adminPassword.length < 12)) {
     throw new Error("Set a real ADMIN_EMAIL and an ADMIN_PASSWORD of at least 12 characters before seeding.");
   }
   const pool = await connectDB();
@@ -252,13 +253,15 @@ try {
     }
   }
 
-  const accountRequest = pool.request();
-  accountRequest.input("email", sql.NVarChar(254), adminEmail);
-  const existingAdmin = await accountRequest.query("SELECT Id FROM dbo.Users WHERE Email = @email");
-  if (!existingAdmin.recordset[0]) {
-    accountRequest.input("name", sql.NVarChar(120), process.env.ADMIN_NAME || "Aurevia Care Owner");
-    accountRequest.input("passwordHash", sql.NVarChar(255), await bcrypt.hash(adminPassword, 12));
-    await accountRequest.query("INSERT INTO dbo.Users (Name, Email, PasswordHash, Role) VALUES (@name, @email, @passwordHash, 'admin')");
+  if (!skipAdmin) {
+    const accountRequest = pool.request();
+    accountRequest.input("email", sql.NVarChar(254), adminEmail);
+    const existingAdmin = await accountRequest.query("SELECT Id FROM dbo.Users WHERE Email = @email");
+    if (!existingAdmin.recordset[0]) {
+      accountRequest.input("name", sql.NVarChar(120), process.env.ADMIN_NAME || "Aurevia Care Owner");
+      accountRequest.input("passwordHash", sql.NVarChar(255), await bcrypt.hash(adminPassword, 12));
+      await accountRequest.query("INSERT INTO dbo.Users (Name, Email, PasswordHash, Role) VALUES (@name, @email, @passwordHash, 'admin')");
+    }
   }
 
   for (const product of products) {

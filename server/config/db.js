@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import tediousSql from "mssql";
+import { readFile } from "node:fs/promises";
 import { PostgresPool, postgresSql } from "./postgres.js";
 
 // Load this once here because database driver selection happens while modules load.
@@ -42,7 +43,8 @@ export const connectDB = async () => {
       if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL must be set when DB_DRIVER=postgres");
       poolPromise = Promise.resolve(new PostgresPool(process.env.DATABASE_URL))
         .then(async (pool) => {
-          await pool.query("CREATE SCHEMA IF NOT EXISTS dbo");
+          const schema = await readFile(new URL("../migrations-postgres/001_schema.sql", import.meta.url), "utf8");
+          await pool.query(schema);
           console.log("PostgreSQL connected");
           return pool;
         })

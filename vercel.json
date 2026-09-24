@@ -2,6 +2,9 @@
   "version": 2,
   "installCommand": "npm install && npm install --prefix client",
   "buildCommand": "node scripts/vercel-build.mjs",
+  "functions": {
+    "api/index.mjs": { "includeFiles": ["server/migrations-postgres/**"] }
+  },
   "builds": [
     { "src": "api/index.mjs", "use": "@vercel/node" },
     { "src": "client/package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }

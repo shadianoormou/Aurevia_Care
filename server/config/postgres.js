@@ -56,6 +56,7 @@ export const rewriteSql = (source) => {
     .replace(/CONVERT\(\s*date\s*,\s*([^\)]+)\)/gi, "CAST($1 AS DATE)")
     .replace(/DATEADD\(\s*DAY\s*,\s*(-?\d+)\s*,\s*CAST\(CURRENT_TIMESTAMP\s+AS\s+DATE\)\s*\)/gi, "(CURRENT_DATE + INTERVAL '$1 day')")
     .replace(/DATEADD\(\s*DAY\s*,\s*(-?\d+)\s*,\s*CURRENT_TIMESTAMP\s*\)/gi, "(CURRENT_TIMESTAMP + INTERVAL '$1 day')")
+    .replace(/\b([A-Za-z]+)\s+LIKE\s+'%'\s*\+\s*(@\w+)\s*\+\s*'%'/gi, "$1 LIKE ('%' || COALESCE($2, '') || '%')")
     .replace(/\b([A-Za-z]+)\s+LIKE\s+'%'\s*\+\s*COALESCE\((@\w+),\s*''\)\s*\+\s*'%'/gi, "$1 LIKE ('%' || COALESCE($2, '') || '%')")
     .replace(/@(isActive|isFeatured|isVerified|requiresPrescription|isPaid|containsPrescriptionItems|prescriptionAcknowledged|isPublished)\s*=\s*1\b/gi, "@$1 = TRUE")
     .replace(/@(isActive|isFeatured|isVerified|requiresPrescription|isPaid|containsPrescriptionItems|prescriptionAcknowledged|isPublished)\s*=\s*0\b/gi, "@$1 = FALSE")

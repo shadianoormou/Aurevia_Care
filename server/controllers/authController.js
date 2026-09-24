@@ -63,7 +63,8 @@ export const registerUser = async (req, res, next) => {
     request.input("email", sql.NVarChar(254), email);
     request.input("phone", sql.NVarChar(30), phone || null);
     const existing = await request.query(`SELECT Id FROM dbo.Users WHERE
-      (@email IS NOT NULL AND Email = @email) OR (@phone IS NOT NULL AND Phone = @phone)`);
+      Email = COALESCE(@email, '__no_matching_email__')
+      OR Phone = COALESCE(@phone, '__no_matching_phone__')`);
     if (existing.recordset[0]) throw httpError("An account with this email already exists", 409);
 
     request.input("name", sql.NVarChar(120), name);

@@ -23,6 +23,8 @@ const GoogleAuthButton = ({ onCredential, onUnavailable, disabled = false }) => 
           client_id: clientId,
           callback: (response) => credentialCallbacks.get(clientId)?.(response.credential),
           ux_mode: "popup",
+          auto_select: false,
+          use_fedcm_for_button: false,
         });
         configuredClients.add(clientId);
       }
@@ -51,29 +53,10 @@ const GoogleAuthButton = ({ onCredential, onUnavailable, disabled = false }) => 
     return <button type="button" disabled={disabled} onClick={onUnavailable} className="auth-google-fallback"><span className="auth-google-mark">G</span>Continue with Google</button>;
   }
 
-  const handleGoogleClick = () => {
-    if (disabled || !ready) return;
-    if (window.google?.accounts?.id) {
-      // Use the official One Tap prompt from our neutral button. This keeps
-      // the visible label generic while still opening Google's account flow.
-      window.google.accounts.id.prompt();
-    } else {
-      onUnavailable?.();
-    }
-  };
-
-  // Google personalizes its hosted iframe label to the last browser account
-  // (for example, "Sign in as Shadia"). Keep the visible surface neutral;
-  // the transparent hosted button remains on top to preserve Google's secure
-  // OAuth flow and account picker.
-  return (
-    <div className={`auth-google-button-wrap ${ready ? "" : "opacity-60"}`}>
-      <button type="button" disabled={disabled || !ready} onClick={handleGoogleClick} className="auth-google-custom">
-        <span className="auth-google-mark">G</span>Continue with Google
-      </button>
-      <div ref={containerRef} className="auth-google-provider" aria-hidden="true" />
-    </div>
-  );
+  // Keep Google's hosted control clickable. Google may personalize its label
+  // to the current browser account, but it is not locked to that account and
+  // the popup remains the supported secure credential flow.
+  return <div ref={containerRef} className={`auth-google-button ${ready ? "" : "opacity-60"}`} aria-label="Continue with Google" />;
 };
 
 export default GoogleAuthButton;

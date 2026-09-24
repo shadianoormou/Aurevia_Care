@@ -30,7 +30,10 @@ const GoogleAuthButton = ({ onCredential, onUnavailable, disabled = false }) => 
         theme: "outline",
         size: "large",
         shape: "pill",
-        text: "continue_with",
+        // `continue_with` is personalized by Google to "Continue as …" for
+        // the last account used in the browser. Keep the shared auth surface
+        // neutral so every visitor can choose their own Google account.
+        text: "signin_with",
         width: 360,
       });
       setReady(true);

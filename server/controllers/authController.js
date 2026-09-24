@@ -93,7 +93,12 @@ export const googleLogin = async (req, res, next) => {
     if (!credential) throw httpError("Google credential is required");
     if (!process.env.GOOGLE_CLIENT_ID) throw httpError("Google sign-in is not configured on this server", 503);
 
-    const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
+    let ticket;
+    try {
+      ticket = await googleClient.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
+    } catch {
+      throw httpError("Google account could not be verified. Please try again.", 401);
+    }
     const payload = ticket.getPayload();
     if (!payload?.sub || !payload.email || payload.email_verified !== true) throw httpError("Google account could not be verified", 401);
 

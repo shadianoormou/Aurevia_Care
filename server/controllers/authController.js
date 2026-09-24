@@ -65,12 +65,12 @@ const ensureConfiguredAdmin = async (email, password) => {
     request.input("id", sql.UniqueIdentifier, existing.recordset[0].Id);
     const updated = await request.query(`UPDATE dbo.Users SET Name = @name, PasswordHash = @passwordHash,
       Role = 'admin', IsActive = 1, UpdatedAt = SYSUTCDATETIME()
-      OUTPUT inserted.${outputColumns} WHERE Id = @id`);
+      OUTPUT inserted.${outputColumns}, inserted.PasswordHash WHERE Id = @id`);
     return updated.recordset[0];
   }
 
   const created = await request.query(`INSERT INTO dbo.Users (Name, Email, PasswordHash, Role)
-    OUTPUT inserted.${outputColumns}
+    OUTPUT inserted.${outputColumns}, inserted.PasswordHash
     VALUES (@name, @email, @passwordHash, 'admin')`);
   return created.recordset[0];
 };

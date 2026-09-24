@@ -1,61 +1,55 @@
 # Aurevia Care
 
-> A safety-first digital pharmacy and local-care discovery platform for Bangladesh.
+> A premium, safety-first digital pharmacy and local-care discovery platform for Bangladesh.
 
-[![React](https://img.shields.io/badge/Web-React%2018-61DAFB?logo=react&logoColor=white)](client)
-[![Express](https://img.shields.io/badge/API-Express%205-000000?logo=express&logoColor=white)](server)
-[![SQL Server](https://img.shields.io/badge/Data-Microsoft%20SQL%20Server-CC2927?logo=microsoftsqlserver&logoColor=white)](server/migrations)
-[![License](https://img.shields.io/badge/license-Private%20client%20project-5B2C6F)](#licensing)
+<p align="center">
+  <a href="https://aurevia-care.vercel.app/"><strong>Open the live product →</strong></a>
+  ·
+  <a href="https://github.com/shadianoormou/aurevia-care">View the repository</a>
+</p>
 
-Aurevia Care pairs a premium pharmacy storefront with prescription-aware fulfilment and a source-attributed Bangladesh care navigator. It is built for a pharmacist-led operating model: the application can help people discover products and care services, but it never diagnoses, prescribes, or substitutes professional medical judgement.
+<p align="center">
+  <img src="https://img.shields.io/badge/Frontend-React%2018%20%2B%20Vite-61DAFB?logo=react&logoColor=white" alt="React and Vite" />
+  <img src="https://img.shields.io/badge/API-Express%205-111827?logo=express&logoColor=white" alt="Express 5" />
+  <img src="https://img.shields.io/badge/Production-Neon%20PostgreSQL-00E699?logo=postgresql&logoColor=111827" alt="Neon PostgreSQL" />
+  <img src="https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white" alt="Vercel" />
+  <img src="https://img.shields.io/badge/Local%20DB-SQL%20Server-CC2927?logo=microsoftsqlserver&logoColor=white" alt="SQL Server" />
+  <img src="https://img.shields.io/badge/license-Private%20client%20project-5B2C6F" alt="Private client project" />
+</p>
 
-## Project links
+Aurevia Care combines an editorial pharmacy storefront, prescription-aware fulfilment, and a source-attributed care navigator in one responsive experience. It is designed for a pharmacist-led operating model: the product helps people discover essentials and local services, but it never diagnoses, prescribes, or replaces professional medical judgement.
 
-| Resource | Availability |
+## Product at a glance
+
+| Resource | Link |
 | --- | --- |
+| Live production site | [aurevia-care.vercel.app](https://aurevia-care.vercel.app/) |
 | Source repository | [github.com/shadianoormou/aurevia-care](https://github.com/shadianoormou/aurevia-care) |
-| Local preview | [http://127.0.0.1:5173](http://127.0.0.1:5173) — available on the development machine |
-| Continuous delivery | [GitHub Actions](https://github.com/shadianoormou/aurevia-care/actions) — validates every push to `main` |
-| Public production site | **Pending Vercel + Neon provisioning** — a public URL is intentionally not claimed before the full secure service is deployed |
+| Deployment history | [GitHub Actions](https://github.com/shadianoormou/aurevia-care/actions) |
+| Frontend preview | [localhost:5173](http://127.0.0.1:5173) when running locally |
 
-> The local preview is not an internet-facing public website. The Vercel deployment target uses Neon PostgreSQL; the Azure App Service path remains available for teams that already have an Azure subscription.
+## What is included
 
-## Why it exists
+- **Premium storefront** — calm editorial layouts, responsive navigation, category-first discovery, product imagery, cart, checkout, reviews, resilient image fallbacks, and mobile-friendly interactions.
+- **Five pharmacy collections** — Medicines & Wellness, Skin Care, Hair & Scalp, Oral & Dental, and Creams & First Aid, with nested everyday-care subcategories.
+- **Prescription centre** — authenticated image/PDF scan upload or manual entry, protected file access, pharmacist review states, approval expiry, and prescription-only order gating.
+- **Care Concierge** — Bangla/English text and browser voice input with symptom-to-specialty routing, safety guidance, location filters, and source-attributed results.
+- **Nationwide location model** — division and district selection across Bangladesh, with directory queries scoped to the chosen location instead of a single-city hardcode.
+- **Local-care directory** — hospitals, doctors, diagnostics, blood-support services, emergency contacts, source URLs, verification dates, and archive workflows.
+- **Professional authentication** — email/password, Bangladesh phone/password, optional Google Identity Services, unique identity indexes, HTTP-only sessions, and rate-limited auth endpoints.
+- **Operations studio** — role-aware admin workspaces for products, images, categories, inventory, orders, prescriptions, users, and directory verification.
+- **Fulfilment controls** — transaction-safe stock reservation, cancellation rollback, immutable order snapshots, status history, and optional order-status email notifications.
+- **Dual database adapter** — Neon PostgreSQL for the hosted Vercel product and Microsoft SQL Server for local or Azure deployments, using the same domain layer.
 
-Healthcare shopping needs more than a pretty catalogue. Aurevia Care gives customers a refined way to browse care essentials, securely submit prescriptions, and find appropriate local services; it gives pharmacy teams the operational controls needed to review prescriptions, manage inventory, publish trusted directory entries, and protect fulfilment history.
+## Safety and trust model
 
-## Highlights
+Aurevia Care is a care-navigation and pharmacy-operations product, not a medical diagnosis engine.
 
-- **Luxury, responsive storefront** — editorial hero layouts, animated category browsing, product imagery, shareable filters, and polished mobile-first interactions.
-- **Five care collections** — Medicines & Wellness, Skin Care, Hair & Scalp, Oral & Dental, and Creams & First Aid, with 21 SQL-backed subcategories.
-- **Prescription centre** — authenticated image/PDF upload or manual entry, protected file access, pharmacist review states, approval expiry, and order gating.
-- **Professional authentication** — email/password or Bangladesh phone/password registration, email-or-phone sign-in, Google Identity Services support, secure HTTP-only sessions, identity uniqueness indexes, and rate-limited auth endpoints.
-- **Voice-assisted discovery** — browser-supported Web Speech input for product and symptom search, with keyboard-friendly manual search as the dependable fallback.
-- **Bangladesh Care Concierge** — Bangla/English text and voice questions with safety-first care routing across all 8 divisions and 64 districts, plus a curated directory for hospitals, doctors, diagnostics, blood support, and emergency contacts.
-- **Trustworthy directory workflow** — public entries must carry a source URL and verification date; admins can publish, update, or archive them without silently deleting history.
-- **Fulfilment controls** — role-based workspaces, transaction-safe stock reservation, cancellation rollback, immutable order snapshots, and inventory administration.
-- **SQL-first foundation** — GUIDs, foreign keys, check constraints, indexes, parameterised queries, migration scripts, location taxonomy, and audit timestamps. Local development supports Microsoft SQL Server; hosted deployment supports Neon PostgreSQL through the compatibility layer.
-
-## Product boundaries
-
-This repository intentionally keeps health and pharmacy operations within safe boundaries.
-
-- The Care Concierge is **care navigation**, not a diagnostic model, emergency service, or medication-dosing engine.
-- Prescription-only products require pharmacist approval before checkout. OCR, when enabled, only extracts text; it does not approve a prescription.
-- Blood availability, chamber schedules, and provider contact details must be confirmed with the provider. The directory records the published source and last verification date.
-- A public medicine registry is not a sellable catalogue. Before a product is listed for sale, the operator needs licensed-supplier authority, accurate price and stock, packaging-image rights, prescription classification, and pharmacist review.
-
-## Technology
-
-| Area | Implementation |
-| --- | --- |
-| Customer web app | React 18, React Router, Vite, Tailwind CSS |
-| API | Node.js, Express 5, Helmet, express-rate-limit, JWT-backed HTTP-only cookies |
-| Database | Microsoft SQL Server locally (`mssql`) or Neon PostgreSQL in the hosted Vercel target (`pg`) |
-| Files | Prescription documents in SQL Server with role and ownership checks; optional Cloudinary product images |
-| Document extraction | Optional Azure AI Document Intelligence `prebuilt-read` model |
-| Care navigator | Safety-first routing rules plus source-attributed local directory data in SQL Server |
-| Authentication | Email/phone password accounts plus optional Google Identity Services verification |
+- The Care Concierge suggests an appropriate care specialty and verified local options; it does not diagnose or provide medication doses.
+- Prescription OCR, when configured, extracts text only. A pharmacist must review and approve a prescription before a restricted product can be fulfilled.
+- Provider schedules, phone numbers, blood availability, and emergency services must be confirmed directly with the provider.
+- Directory records carry a source URL and verification date. If a district has no verified record, the interface points to the official [DGHS Facility Registry](https://hrm.dghs.gov.bd/public/facility-registry) instead of inventing a provider.
+- Product publishing remains an operator responsibility: licence, supplier authority, price, stock, packaging rights, and prescription classification must be verified before sale.
 
 ## Architecture
 
@@ -63,75 +57,89 @@ This repository intentionally keeps health and pharmacy operations within safe b
 flowchart TB
     Browser[Customer and staff browser]
 
-    subgraph Experience[React + Vite experience layer]
-        Storefront[Premium storefront / Catalogue / Cart / Checkout]
-        Care[Care Concierge / Bangla-English / Voice input]
-        Prescription[Prescription Centre / Upload / Manual entry / Status]
-        Backoffice[Protected staff portal / Orders / Inventory / Directory]
+    subgraph Experience[React + Vite experience]
+        Storefront[Storefront / Catalogue / Cart / Checkout]
+        Care[Care Concierge / Bangla-English / Voice]
+        Prescription[Prescription Centre / Scan / Manual entry]
+        Admin[Protected operations studio]
     end
 
     subgraph Service[Express application service]
-        Security[HTTP-only sessions / Role checks / Rate limits / Validation]
-        Commerce[Catalogue / Reviews / Orders / Stock reservation]
-        Clinical[Prescription workflow / Human pharmacist approval]
-        Navigator[Care navigator / Source-attributed routing]
+        Security[HTTP-only cookies / Roles / Rate limits / Validation]
+        Commerce[Catalogue / Reviews / Orders / Inventory]
+        Clinical[Prescription workflow / Pharmacist approval]
+        Navigator[Location-aware care routing / Directory]
     end
 
-    subgraph Data[Microsoft SQL Server / Azure SQL]
+    subgraph Data[Production: Neon PostgreSQL | Local: SQL Server]
         Core[(Users / Products / Categories / Orders / Reviews)]
-        Protected[(Prescriptions · Audit history)]
-        Directory[(Bangladesh care directory / Location / Sources / Verification dates)]
+        Protected[(Prescriptions / Audit history)]
+        Directory[(Bangladesh locations / Providers / Sources)]
     end
 
-    subgraph Optional[Optional managed services]
+    subgraph Optional[Optional integrations]
+        Google[Google Identity Services]
         OCR[Azure AI Document Intelligence]
-        Images[Cloudinary product images]
+        Media[Cloudinary product media]
+        Mail[SMTP order notifications]
     end
 
     Browser --> Storefront
     Browser --> Care
     Browser --> Prescription
-    Browser --> Backoffice
+    Browser --> Admin
     Storefront --> Security
     Care --> Security
     Prescription --> Security
-    Backoffice --> Security
+    Admin --> Security
     Security --> Commerce
     Security --> Clinical
     Security --> Navigator
     Commerce --> Core
     Clinical --> Protected
     Navigator --> Directory
-    Clinical -. assistive text extraction .-> OCR
-    Commerce -. product media .-> Images
+    Security -. optional sign-in .-> Google
+    Clinical -. assistive extraction .-> OCR
+    Commerce -. optional images .-> Media
+    Commerce -. status email .-> Mail
 ```
 
-| Layer | Responsibility | Safety control |
-| --- | --- | --- |
-| React experience | Customer journey and protected staff workspaces | No clinical decision is made in the browser |
-| Express service | API contracts, authentication, workflow enforcement, and business rules | HTTP-only cookies, role checks, allowlisted filters, rate limits |
-| SQL data layer | Transactional catalogue, fulfilment, prescription, and directory records | GUIDs, foreign keys, constraints, indexes, and audit timestamps |
-| Pharmacist review | Prescription approval and prescription-only ordering | OCR is assistive only; human approval is mandatory |
-| Provider verification | Local care and blood-support directory publishing | Source URL, verification date, and publish/archive workflow |
+### Request lifecycle
 
-### Production request path
+The live Vercel deployment serves the React build and Express API on one HTTPS origin. The browser calls `/api`; the API applies authentication, validation, rate limits, and role checks before reading or writing Neon PostgreSQL. The database URL and all operational credentials remain server-side. Vercel's build step runs the PostgreSQL migration/bootstrap before the application is served.
 
-The hosted Vercel target serves the React client as a static build and the Express API as a serverless function. The browser calls `/api` from the same HTTPS domain; Express applies security controls and uses Neon PostgreSQL for persistent data. This avoids exposing a database connection to the browser and keeps the authenticated session cookie first-party.
+## Technology stack
+
+| Layer | Implementation |
+| --- | --- |
+| Web app | React 18, React Router, Vite, Tailwind CSS |
+| API | Node.js 20+, Express 5, Helmet, CORS, express-rate-limit, express-validator |
+| Persistence | Neon PostgreSQL in production; Microsoft SQL Server/LocalDB for local development |
+| Authentication | JWT-backed HTTP-only cookies, email/phone accounts, optional Google Identity Services |
+| Documents | Protected prescription uploads with optional Azure AI Document Intelligence OCR |
+| Media and notifications | Optional Cloudinary product images and SMTP order-status emails |
+| Delivery | Vercel serverless API + static client, GitHub source control and Actions |
 
 ## Repository layout
 
 ```text
-client/                   React web application
-  src/pages/              Customer, care, checkout, and administration views
-  src/components/         Reusable interface components
-server/                   Express API
-  migrations/             Idempotent SQL Server schema migrations
+client/
+  src/pages/              Customer, care, checkout, auth, and admin views
+  src/components/         Shared navigation, concierge, forms, and admin UI
+  src/context/            Cart and authentication state
+  public/                 Brand marks and favicon assets
+server/
   controllers/            Domain and workflow logic
-  routes/                 HTTP route definitions
-  data/                   Import templates and symptom/location reference data
-  seed/                   Development catalogue and care-directory bootstrap
-  scripts/migrate.js      Migration runner
-  scripts/importCareDirectory.js  Validated source-attributed directory importer
+  routes/                 API route definitions
+  middleware/             Authentication, validation, and error handling
+  migrations/             SQL Server schema migrations
+  migrations-postgres/    PostgreSQL schema migration
+  config/                 Database adapters and hosted bootstrap catalogue
+  data/                   Symptom map and directory import schema
+  scripts/                Migration and verified directory import tools
+api/index.mjs             Vercel entrypoint for the Express API
+scripts/vercel-build.mjs  Production migration, bootstrap, and client build
+vercel.json               Vercel build and same-origin routing rules
 ```
 
 ## Run locally
@@ -139,156 +147,143 @@ server/                   Express API
 ### Prerequisites
 
 - Node.js 20 or later
-- Microsoft SQL Server 2022+, SQL Server LocalDB, or Azure SQL
-- A SQL login permitted to create and use the Aurevia Care database
+- Microsoft SQL Server 2022+, SQL Server LocalDB, or another SQL Server instance
+- A database named `aurevia_care` and a login allowed to run migrations
 
 ### 1. Configure the API
 
-Create a database named `aurevia_care`. Then copy `server/.env.example` to `server/.env` and set the database connection values plus a unique, 32-character-or-longer `JWT_SECRET`.
-
 ```powershell
 cd server
+Copy-Item .env.example .env
 npm install
-npm run db:migrate
 ```
 
-For a local starter catalogue and the initial seeded care-directory entries, add a real `ADMIN_EMAIL` and a 12-character-or-longer `ADMIN_PASSWORD` to `server/.env`, then run:
+Set the SQL Server values and a unique JWT secret in `server/.env`, then migrate and seed development data:
 
 ```powershell
+npm run db:migrate
 npm run seed
 ```
 
-The seed command is deliberately blocked in production unless `ALLOW_PRODUCTION_SEED=true` has been explicitly configured. The starter directory currently contains only source-attributed seed records; the Bangladesh location taxonomy is ready for verified provider imports without inventing coverage.
+`npm run seed` is for development/bootstrap data and is blocked in production unless explicitly enabled. Never commit `.env`, database credentials, OAuth secrets, or administrator passwords.
 
-### 2. Configure and start the web app
+### 2. Start the API and client
 
-Copy `client/.env.example` to `client/.env`. The development default is sufficient when the API is running locally because Vite forwards `/api` to port 5000.
+In one terminal:
 
 ```powershell
-cd ../client
+cd server
+npm run dev
+```
+
+In another terminal:
+
+```powershell
+cd client
+Copy-Item .env.example .env
 npm install
 npm run dev
 ```
 
-Start the API separately:
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Vite proxies `/api` to the local API on port 5000.
+
+### Hosted PostgreSQL workflow
+
+For a managed PostgreSQL database such as Neon, set `DATABASE_URL` and run the PostgreSQL migration from the repository root:
 
 ```powershell
-cd ../server
-npm run dev
-```
-
-Open `http://127.0.0.1:5173`.
-
-## Quality checks
-
-```powershell
-# Web production build
-cd client
-npm run build
-
-# Runtime dependency audit
-cd ../server
-npm audit --omit=dev
-```
-
-### Authentication configuration
-
-Phone registration is available with a password and normalises Bangladesh numbers to `+8801XXXXXXXXX`. Google sign-in uses one OAuth Web Client ID in both the Vite client and Express API:
-
-```env
-# client/.env
-VITE_GOOGLE_CLIENT_ID=your_web_client_id.apps.googleusercontent.com
-
-# server/.env
-GOOGLE_CLIENT_ID=your_web_client_id.apps.googleusercontent.com
-```
-
-Add both local origins (`http://127.0.0.1:5173` and `http://localhost:5173`) plus the production HTTPS origin to the Google OAuth authorised JavaScript origins. Set the same two environment variables in the hosting platform; the local values are intentionally ignored by Git. Never commit OAuth secrets, JWT secrets, SQL credentials, or administrator passwords. The bootstrap administrator requires a unique password of at least 12 characters; weak passwords such as `0000` are rejected by design.
-
-### Admin operations studio
-
-Staff with an `admin` role use `/admin/dashboard` for the protected operations workspace. The shell exposes role-aware controls for order fulfilment, prescription review, inventory and verification, product records and media, featured categories, customer/staff accounts, and the source-attributed care directory. Product image uploads are validated, stored through Cloudinary when configured, and can be removed from media storage from the product editor. Categories support ordering and featured placement without allowing deletion while products still reference them.
-
-Order status transitions are audited in SQL Server. When a status is changed, Aurevia Care attempts to email the registered customer address without rolling back the order if email delivery is unavailable. Configure the optional SMTP settings in `server/.env` (see `server/.env.example`) for production notifications; phone-only accounts are updated in the app but do not receive an email until an address is added.
-
-The storefront includes server-backed price and availability filters, category-first discovery, resilient image fallbacks, and a protected error boundary. Customers can follow an order through a visual received → confirmed → preparing → shipped → delivered timeline, while staff can open a read-only workspace settings drawer for connection and role safeguards. These surfaces are intentionally presentation-safe: operational secrets remain server-side.
-
-## Production deployment
-
-The primary no-subscription target is Vercel + Neon PostgreSQL. `vercel.json` packages the React client and Express API on one HTTPS origin; the Neon integration injects `DATABASE_URL` without exposing it to the browser. Use the PostgreSQL migration command below before the first production request.
-
-```bash
+$env:DATABASE_URL = "postgresql://user:password@host/database?sslmode=require"
 cd server
 npm run db:migrate:postgres
 ```
 
-The repository also retains a repeatable App Service + Azure SQL bootstrap template at [`infra/azure/main.bicep`](infra/azure/main.bicep) for clients that have an Azure subscription. The Neon/PostgreSQL adapter keeps local SQL Server development and hosted deployment on the same application codebase.
+The production Vercel build performs this migration/bootstrap automatically when `DATABASE_URL` is available.
 
-Configure production secrets with the host’s secret manager—never commit them. At a minimum, configure:
+## Environment configuration
+
+The complete templates are in [`server/.env.example`](server/.env.example) and [`client/.env.example`](client/.env.example). Common production values are:
 
 ```env
 NODE_ENV=production
 DATABASE_URL=postgresql://managed-by-neon
-JWT_SECRET=a_unique_secret_with_at_least_32_characters
-CLIENT_URL=https://your-project.vercel.app
+JWT_SECRET=a-unique-secret-at-least-32-characters-long
 COOKIE_SAME_SITE=lax
+CLIENT_URL=https://aurevia-care.vercel.app
+VITE_API_URL=/api
 ```
 
-Run `npm run db:migrate:postgres` against the Neon database before the first production request. A PCI-compliant payment provider must be integrated server-side before collecting card details.
+Optional capabilities use `GOOGLE_CLIENT_ID`/`VITE_GOOGLE_CLIENT_ID`, Cloudinary variables, SMTP variables, and Azure Document Intelligence variables. For Google sign-in, configure both `http://127.0.0.1:5173` and the production HTTPS origin as authorised JavaScript origins.
 
-### Vercel automatic deployment
+## Production deployment
 
-Import `https://github.com/shadianoormou/Aurevia_Care` as a Vercel project, connect the `aurevia-care-db` Neon resource to Production and Preview, and add `JWT_SECRET` plus `COOKIE_SAME_SITE=lax` in the project environment. Vercel then redeploys from `main` and injects the managed `DATABASE_URL` automatically.
+The live project is deployed through Vercel with Neon PostgreSQL:
 
-### GitHub automatic deployment
+1. Import the GitHub repository into Vercel.
+2. Connect the `aurevia-care-db` Neon resource to Production and Preview.
+3. Add `DATABASE_URL`, a strong `JWT_SECRET`, and `COOKIE_SAME_SITE=lax` to the Vercel environment.
+4. Keep the project build settings from [`vercel.json`](vercel.json); they install the root and client dependencies, migrate/bootstrap PostgreSQL, and build the Vite client.
+5. Push to `main` to trigger a new Vercel deployment.
 
-Every push to `main` runs [`.github/workflows/azure-production.yml`](.github/workflows/azure-production.yml). It validates the API, builds the React application with the same-origin `/api` base URL, bundles it into `server/public`, and deploys the release to Azure App Service when the following GitHub **production environment** secrets and variable are present:
+The current production URL is [https://aurevia-care.vercel.app](https://aurevia-care.vercel.app). The API health check is available at [`/api/health`](https://aurevia-care.vercel.app/api/health).
 
-| GitHub configuration | Purpose |
-| --- | --- |
-| `AZURE_CLIENT_ID` secret | Azure workload-identity application ID |
-| `AZURE_TENANT_ID` secret | Microsoft Entra tenant ID |
-| `AZURE_SUBSCRIPTION_ID` secret | Azure subscription ID |
-| `AZURE_WEBAPP_NAME` variable | Name of the pre-created Azure App Service app |
+An optional Azure App Service + Azure SQL template remains in [`infra/azure/`](infra/azure/) for teams with an Azure subscription. The primary no-subscription deployment path is Vercel + Neon.
 
-The workflow uses GitHub-to-Azure OpenID Connect, so no long-lived publish-profile or Azure password is stored in the repository. Create a federated credential in Azure that trusts this repository’s `main` branch and grants that identity access to the App Service. Until these values are configured, the build remains green and deployment is intentionally skipped rather than pretending a release succeeded.
+## API quick reference
 
-## Care-directory operations
+```text
+GET  /api/health
+GET  /api/categories
+GET  /api/products?limit=12
+GET  /api/care-navigator/locations
+GET  /api/care-navigator/directory?division=Rajshahi&district=Rajshahi
+POST /api/care-navigator/ask  { "message": "কাশি হলে কোন ডাক্তার দেখাব?" }
+POST /api/prescriptions/scan  (authenticated multipart upload)
+POST /api/prescriptions/manual (authenticated manual submission)
+GET  /api/orders/my-orders    (authenticated customer history)
+GET  /api/admin/stats         (authenticated admin dashboard)
+```
 
-The initial Rajshahi entries point only to institutional sources such as RMCH, Ibn Sina Trust, Bangladesh Red Crescent Blood Center, Christian Mission Hospital Rajshahi, and the DGHS facility registry. The operating team should verify schedules, contacts, and blood-support availability directly with providers before publishing or refreshing each record.
+## Admin operations
 
-The location layer is nationwide-ready: the public care guide exposes all 8 divisions and 64 districts, and every directory query is filtered by the selected division/district. Concierge intent routing includes dental, respiratory, orthopaedic leg/knee/ankle pain, vascular swelling, neurological weakness/numbness, women’s health, paediatrics, dermatology, ophthalmology, cardiology, diabetes, mental health, and urinary/kidney care. A specialist result is never replaced with an unrelated doctor; a verified hospital/OPD referral is shown separately when available. Coverage is deliberately evidence-based—an empty district shows the official [DGHS Facility Registry](https://hrm.dghs.gov.bd/public/facility-registry) instead of inventing a hospital, doctor, diagnostic centre, phone number, or blood-stock claim. A complete national directory requires an authorised export or API feed for facilities and a separately verified provider roster for doctors.
+Admins can work from `/admin/dashboard` after signing in with an account that has the `admin` role. The protected workspace includes:
 
-To load a verified export, create a JSON file using `server/data/care-directory.import.example.json` as the schema and run:
+- category and product CRUD, media uploads, stock, featured placement, and soft-delete/archive behaviour;
+- order queue, status transitions, customer notification attempts, and order history;
+- prescription review, approval expiry, and pharmacist-only access to protected files;
+- customer/staff access management and role-aware navigation;
+- care-directory publishing, source URL, verification date, location scope, and archive controls.
+
+Order email delivery is optional and configured through SMTP. If delivery is unavailable, the order transition remains intact and the failure is logged for operational follow-up.
+
+## Care-directory data operations
+
+The location layer is ready for Bangladesh's 8 divisions and 64 districts. Concierge routing covers dental, respiratory, orthopaedic leg/knee/ankle pain, vascular swelling, neurological symptoms, women's health, paediatrics, dermatology, ophthalmology, cardiology, diabetes, mental health, and urinary/kidney care.
+
+Only verified, source-attributed records should be imported. Use [`server/data/care-directory.import.example.json`](server/data/care-directory.import.example.json) as the schema:
 
 ```powershell
 cd server
 npm run directory:import -- C:\path\to\verified-care-directory.json
 ```
 
-The importer rejects unsupported kinds, unknown Bangladesh divisions/districts, missing addresses, non-HTTPS sources, and records without a verification date. Matching `Name + Kind` rows are updated; new rows are inserted in one SQL transaction. This makes the import repeatable while keeping source attribution and location scope attached to every published record.
+The importer rejects unknown locations, missing addresses, non-HTTPS sources, unsupported record kinds, and missing verification dates. Matching `Name + Kind` records are updated; new records are inserted in one transaction.
 
-Public endpoints are intentionally narrow:
+## Quality and security checks
 
-```text
-GET  /api/care-navigator/directory?kind=doctor&q=orthopedics
-GET  /api/care-navigator/locations
-GET  /api/care-navigator/coverage?division=Dhaka&district=Dhaka
-POST /api/care-navigator/ask  { "message": "হাড়ে ব্যথা হলে কোন ডাক্তার?" }
+```powershell
+cd client
+npm run build
+
+cd ../server
+node --check server.js
+npm audit --omit=dev
 ```
 
-## Security and privacy
-
-- Cookies are HTTP-only and authenticated routes use role checks.
-- Authentication and care-navigator endpoints are rate limited, and Express security headers are enabled.
-- SQL inputs use parameterised queries; product sort and filter values are allowlisted.
-- Product deletion archives records. User deletion deactivates an account so clinical and fulfilment history is retained.
-- Prescription files are restricted to the owner and authorised pharmacy staff.
-- Never commit `.env` files, connection strings, JWT secrets, cloud-storage credentials, or Azure AI credentials.
+Security controls include HTTP-only cookies, role checks, request validation, rate limits, Helmet headers, parameterised SQL, allowlisted catalogue filters, protected prescription ownership checks, and audit timestamps. Product and user removal preserve operational history through archive/deactivation semantics.
 
 ## Licensing
 
-This is a private client project. The code, design, content, and operational data may not be reused, redistributed, or deployed without the project owner’s written permission.
+This is a private client project. The code, design, content, and operational data may not be reused, redistributed, or deployed without the project owner's written permission.
 
 ---
 

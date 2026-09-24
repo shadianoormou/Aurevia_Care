@@ -47,7 +47,7 @@ const Register = () => {
         <section className="auth-card">
           <div className="flex items-center justify-between gap-4"><div><p className="eyebrow">Create your account</p><h2 className="font-display text-3xl text-primary-900 mt-2">Welcome to Aurevia.</h2><p className="text-sm text-slate-500 mt-2">Choose how you would like to create your secure account.</p></div><FiShield className="text-accent-600 text-2xl shrink-0" /></div>
           <div className="auth-method-switch" role="tablist" aria-label="Registration method"><button type="button" onClick={() => setRegisterMode("email")} className={registerMode === "email" ? "auth-method-active" : ""}><FiMail /> Email</button><button type="button" onClick={() => setRegisterMode("phone")} className={registerMode === "phone" ? "auth-method-active" : ""}><FiPhone /> Phone</button></div>
-          <GoogleAuthButton onCredential={onGoogleCredential} onUnavailable={() => toast("Google sign-up needs a configured OAuth client.")} disabled={googleBusy || submitting} />
+          <GoogleAuthButton onCredential={onGoogleCredential} onUnavailable={(message) => toast(message || "Google sign-up could not be opened.")} disabled={googleBusy || submitting} />
           <div className="auth-divider"><span>or continue with {registerMode}</span></div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>

@@ -51,7 +51,18 @@ const GoogleAuthButton = ({ onCredential, onUnavailable, disabled = false }) => 
     return <button type="button" disabled={disabled} onClick={onUnavailable} className="auth-google-fallback"><span className="auth-google-mark">G</span>Continue with Google</button>;
   }
 
-  return <div ref={containerRef} className={`auth-google-button ${ready ? "" : "opacity-60"}`} aria-label="Continue with Google" />;
+  // Google personalizes its hosted iframe label to the last browser account
+  // (for example, "Sign in as Shadia"). Keep the visible surface neutral;
+  // the transparent hosted button remains on top to preserve Google's secure
+  // OAuth flow and account picker.
+  return (
+    <div className={`auth-google-button-wrap ${ready ? "" : "opacity-60"}`}>
+      <button type="button" disabled={disabled || !ready} className="auth-google-custom">
+        <span className="auth-google-mark">G</span>Continue with Google
+      </button>
+      <div ref={containerRef} className="auth-google-provider" aria-hidden="true" />
+    </div>
+  );
 };
 
 export default GoogleAuthButton;

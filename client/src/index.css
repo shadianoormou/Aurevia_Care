@@ -110,7 +110,7 @@ body { @apply bg-[#f2f5f3] text-slate-800 font-sans antialiased; }
 .auth-method-active { @apply bg-white text-primary-900 shadow-sm; }
 .auth-google-button-wrap { @apply relative mt-5 min-h-10 w-full; }
 .auth-google-custom { @apply relative z-[1] flex min-h-10 w-full items-center justify-center gap-3 rounded-xl border border-primary-100 bg-white py-3 text-xs font-extrabold text-primary-800 shadow-sm transition hover:border-primary-300 hover:bg-primary-50 disabled:cursor-not-allowed; }
-.auth-google-provider { @apply absolute inset-0 z-[2] flex justify-center opacity-0; }
+.auth-google-provider { @apply pointer-events-none absolute inset-0 z-0 flex justify-center opacity-0; }
 .auth-google-fallback { @apply mt-5 flex w-full items-center justify-center gap-3 rounded-xl border border-primary-100 bg-white py-3 text-xs font-extrabold text-primary-800 shadow-sm transition hover:border-primary-300 hover:bg-primary-50; }
 .auth-google-mark { @apply font-display text-xl font-bold text-[#4285f4]; }
 .auth-divider { @apply my-5 flex items-center gap-3 text-[10px] font-extrabold uppercase tracking-[.13em] text-slate-400; }

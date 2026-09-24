@@ -24,7 +24,7 @@ export const getStats = async (req, res, next) => {
       SELECT CAST(CreatedAt AS DATE) AS SaleDate, COALESCE(SUM(TotalPrice), 0) AS Sales, COUNT(1) AS Orders
       FROM dbo.Orders WHERE Status = 'Delivered' AND CreatedAt >= DATEADD(DAY, -6, CAST(SYSUTCDATETIME() AS DATE))
       GROUP BY CAST(CreatedAt AS DATE) ORDER BY SaleDate;
-      SELECT Status AS [Status], COUNT(1) AS Count FROM dbo.Orders GROUP BY Status;
+      SELECT Status AS Status, COUNT(1) AS Count FROM dbo.Orders GROUP BY Status;
     `);
     const days = new Map(recordsets[4].map((row) => [new Date(row.SaleDate).toISOString().slice(0, 10), row]));
     const salesByDay = Array.from({ length: 7 }, (_, index) => {

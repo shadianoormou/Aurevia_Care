@@ -66,7 +66,18 @@ const AdminDashboard = () => {
     setRefreshing(false);
   }, [isAdmin]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") load(true);
+    };
+    const interval = window.setInterval(refreshWhenVisible, 30000);
+    window.addEventListener("focus", refreshWhenVisible);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refreshWhenVisible);
+    };
+  }, [load]);
 
   const { stats, lowStock, orders, pendingPrescriptions, health } = snapshot;
   const attentionCount = lowStock.length + pendingPrescriptions.length + orders.filter((order) => order.status === "Pending").length;
@@ -109,7 +120,7 @@ const AdminDashboard = () => {
           <div className="flex items-start justify-between gap-3"><span className="admin-health-icon"><FiWifi /></span><span className="admin-health-dot" /></div>
           <p className="admin-metric-label">Platform health</p>
           <p className="admin-health-title">{health?.status === "healthy" ? "All systems ready" : "Check connection"}</p>
-          <p className="admin-metric-foot">SQL Server · secure sessions</p>
+          <p className="admin-metric-foot">{health?.database || "Production database"} · secure sessions</p>
         </article>
       </div>
 

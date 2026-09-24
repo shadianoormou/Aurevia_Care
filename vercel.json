@@ -1,9 +1,9 @@
 {
   "version": 2,
   "installCommand": "npm install && npm install --prefix client",
-  "buildCommand": "node scripts/vercel-build.mjs",
+  "buildCommand": "npm --prefix client run build",
   "functions": {
-    "api/index.mjs": { "includeFiles": ["server/migrations-postgres/**"] }
+    "api/index.mjs": { "includeFiles": ["server/migrations-postgres/001_schema.sql"] }
   },
   "builds": [
     { "src": "api/index.mjs", "use": "@vercel/node" },

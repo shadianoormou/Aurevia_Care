@@ -42,6 +42,18 @@ Aurevia Care combines an editorial pharmacy storefront, prescription-aware fulfi
 - **Fulfilment controls** — transaction-safe stock reservation, cancellation rollback, immutable order snapshots, status history, and optional order-status email notifications.
 - **Dual database adapter** — Neon PostgreSQL for the hosted Vercel product and Microsoft SQL Server for local or Azure deployments, using the same domain layer.
 
+## Product story
+
+**The problem.** Buying a simple health essential and finding the right local service are often separate, high-friction tasks. People may have to search scattered pages, call several numbers, and still cannot tell whether a listing is current.
+
+**Who it is for.** Aurevia is designed for people in Bangladesh who want a calmer pharmacy experience, and for pharmacist-led teams that need a trustworthy operating layer behind it. The experience is intentionally useful to both a customer discovering care and a staff member reviewing fulfilment.
+
+**The product decision.** The storefront, Care Concierge, prescription centre, and operations studio share one source of truth. A user can ask in Bangla or English, narrow the result to a district, inspect the source and verification date, then move into a curated catalogue without leaving the product.
+
+**The boundary.** Aurevia guides and connects; it does not diagnose or prescribe. A provider phone number is a starting point, not a promise of availability. Prescription-only fulfilment remains behind authenticated pharmacist review, and the interface directs emergencies to immediate professional help.
+
+The [narrated two-minute demo](https://aurevia-care.vercel.app/demo.html) shows this story end to end: the care problem, a source-attributed Rajshahi result, accountable product discovery, protected checkout, and the safety model behind the interface.
+
 ## Safety and trust model
 
 Aurevia Care is a care-navigation and pharmacy-operations product, not a medical diagnosis engine.

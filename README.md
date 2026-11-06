@@ -25,7 +25,7 @@ Aurevia Care combines an editorial pharmacy storefront, prescription-aware fulfi
 | --- | --- |
 | Live production site | [aurevia-care.vercel.app](https://aurevia-care.vercel.app/) |
 | Source repository | [github.com/shadianoormou/aurevia-care](https://github.com/shadianoormou/aurevia-care) |
-| Product demo | [Watch/download the narrated two-minute walkthrough](https://raw.githubusercontent.com/shadianoormou/Aurevia_Care/main/client/public/media/aurevia-care-demo.mp4) |
+| Product demo | [Watch the narrated two-minute walkthrough](https://shadianoormou.github.io/Aurevia_Care/) |
 | Deployment history | [GitHub Actions](https://github.com/shadianoormou/aurevia-care/actions) |
 | Frontend preview | [localhost:5173](http://127.0.0.1:5173) when running locally |
 
@@ -52,7 +52,7 @@ Aurevia Care combines an editorial pharmacy storefront, prescription-aware fulfi
 
 **The boundary.** Aurevia guides and connects; it does not diagnose or prescribe. A provider phone number is a starting point, not a promise of availability. Prescription-only fulfilment remains behind authenticated pharmacist review, and the interface directs emergencies to immediate professional help.
 
-The [narrated two-minute demo](https://raw.githubusercontent.com/shadianoormou/Aurevia_Care/main/client/public/media/aurevia-care-demo.mp4) shows this story end to end: the care problem, a source-attributed Rajshahi result, accountable product discovery, protected checkout, and the safety model behind the interface. When the Vercel project is connected to this repository, [`client/public/demo.html`](client/public/demo.html) provides the branded video landing page and social preview metadata.
+The [narrated two-minute demo](https://shadianoormou.github.io/Aurevia_Care/) shows this story end to end: the care problem, a source-attributed Rajshahi result, accountable product discovery, protected checkout, and the safety model behind the interface. The Vercel project can also serve [`client/public/demo.html`](client/public/demo.html) when it is connected to this repository.
 
 ## Safety and trust model
 

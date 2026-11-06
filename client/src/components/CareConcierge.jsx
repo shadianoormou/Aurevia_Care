@@ -12,6 +12,12 @@ const QUICK_PROMPTS = [
   "হাড়ে ব্যথা হলে কোথায় যাব?",
 ];
 
+const phoneHref = (phone) => {
+  const firstNumber = String(phone || "").split(/[;,/|]/)[0].trim();
+  const normalized = firstNumber.replace(/[^+\d]/g, "");
+  return normalized ? `tel:${normalized}` : undefined;
+};
+
 const EntryCards = ({ entries = [] }) => (
   <div className="mt-3 grid gap-2">
     {entries.slice(0, 3).map((entry) => (
@@ -27,7 +33,7 @@ const EntryCards = ({ entries = [] }) => (
           <FiMapPin className="mt-0.5 shrink-0 text-primary-600" /> <span>{entry.address}</span>
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[11px] font-semibold">
-          {entry.phone && <a href={`tel:${entry.phone.replace(/[^+\d]/g, "")}`} className="inline-flex gap-1 items-center text-primary-700 hover:text-primary-900"><FiPhoneCall /> {entry.phone}</a>}
+          {entry.phone && <a href={phoneHref(entry.phone)} className="inline-flex gap-1 items-center text-primary-700 hover:text-primary-900"><FiPhoneCall /> {entry.phone}</a>}
           {entry.email && <a href={`mailto:${entry.email}`} className="text-primary-700 hover:text-primary-900">Email contact</a>}
           <a href={entry.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex gap-1 items-center text-slate-500 hover:text-primary-800">Source <FiArrowUpRight /></a>
         </div>

@@ -25,6 +25,7 @@ Aurevia Care combines an editorial pharmacy storefront, prescription-aware fulfi
 | --- | --- |
 | Live production site | [aurevia-care.vercel.app](https://aurevia-care.vercel.app/) |
 | Source repository | [github.com/shadianoormou/aurevia-care](https://github.com/shadianoormou/aurevia-care) |
+| Product demo | [Watch the narrated two-minute walkthrough](https://aurevia-care.vercel.app/demo.html) |
 | Deployment history | [GitHub Actions](https://github.com/shadianoormou/aurevia-care/actions) |
 | Frontend preview | [localhost:5173](http://127.0.0.1:5173) when running locally |
 
